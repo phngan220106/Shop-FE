@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import HomePage from './pages/users/homePage/index.jsx'
+import './style/style.scss'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
