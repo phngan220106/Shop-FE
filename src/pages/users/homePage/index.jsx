@@ -1,13 +1,19 @@
 import { memo } from 'react';
 import Header from '../theme/header/index.jsx';
+import { useState } from "react";
+import Btn from "./nutDangNhap/Btn.jsx";
 
-const HomePage = () => {
+
+function HomePage() {
+    const [isAuthOpen, setIsAuthOpen] = useState(false);
+
     return (
-        <>
-            <Header />
-            <h2>HomePage</h2>
-            <h2>Footer</h2>
-        </>
+        <div className="home-page">
+            <Btn />
+
+
+        </div >
+
     );
-};
+}
 export default memo(HomePage);

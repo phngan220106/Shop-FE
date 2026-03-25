@@ -7,6 +7,6 @@ import './style/style.scss'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <HomePage />
+    <App />
   </StrictMode>,
 )
