@@ -4,6 +4,7 @@ import HomePage from "./pages/users/homePage/index.jsx"; // Gọi trang chủ
 import BeautyBlog from "./pages/users/Blog/index.jsx";
 import ProductPage from "./pages/users/productPage/index.jsx";
 import Orders from "./pages/users/Orders/index.jsx";
+import Footer from "./pages/users/theme/footer/index.jsx";
 function App() {
   return (
     <BrowserRouter>
@@ -15,6 +16,7 @@ function App() {
         <Route path="/blog" element={<BeautyBlog />} />
         <Route path="/don-hang" element={<Orders />} />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }

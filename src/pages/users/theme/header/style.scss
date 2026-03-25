@@ -30,10 +30,37 @@
     .header-top {
         background-color: #00bfa5; // Màu xanh teal
         color: white;
-        text-align: center;
         padding: 8px 0;
         font-size: 13px;
-        font-weight: bold;
+        font-weight: 500;
+
+        .promo-marquee {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .promo-track {
+            display: inline-flex;
+            align-items: center;
+            gap: 64px;
+            min-width: 100%;
+            animation: promo-scroll 12s linear infinite;
+
+            span {
+                display: inline-block;
+            }
+        }
+    }
+
+    @keyframes promo-scroll {
+        from {
+            transform: translateX(0);
+        }
+
+        to {
+            transform: translateX(-50%);
+        }
     }
 
     .header-middle {
@@ -48,35 +75,79 @@
         }
 
         .logo img {
-            height: 50px;
+            height: 72px;
+            width: auto;
+            display: block;
+            object-fit: contain;
+            position: relative;
+            z-index: 1;
+            animation: logo-blink 2.8s ease-in-out infinite;
+        }
+
+        .logo {
+            position: relative;
+            overflow: hidden;
+
+            &::after {
+                content: "";
+                position: absolute;
+                top: -20%;
+                left: -45%;
+                width: 40%;
+                height: 140%;
+                background: linear-gradient(110deg,
+                        rgba(255, 255, 255, 0) 0%,
+                        rgba(255, 255, 255, 0.75) 50%,
+                        rgba(255, 255, 255, 0) 100%);
+                transform: translateX(-220%) skewX(-18deg);
+                pointer-events: none;
+                animation: logo-shine 3.6s linear infinite;
+                z-index: 2;
+            }
+
+            &::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                box-shadow: 0 0 0 rgba(255, 145, 182, 0.0);
+                animation: logo-glow 2.8s ease-in-out infinite;
+                border-radius: 12px;
+                pointer-events: none;
+                z-index: 0;
+            }
         }
 
         .search-box {
             flex: 1;
             max-width: 500px;
-            position: relative;
+            display: flex;
+            align-items: stretch;
+            height: 48px;
+            border-radius: 25px;
+            border: 1px solid #fce4ec;
+            background: #fce4ec44;
+            overflow: hidden;
 
             input {
-                width: 100%;
-                padding: 10px 20px;
-                border-radius: 25px;
-                border: 1px solid #fce4ec;
-                background: #fce4ec44;
+                flex: 1;
+                padding: 0 20px;
+                border: none;
+                background: transparent;
                 outline: none;
+                font-size: 16px;
             }
 
             button {
-                position: absolute;
-                right: 0;
-                top: 0;
-                height: 100%;
-                width: 55px;
+                width: 64px;
                 background: #f06292; // Màu hồng nút search
                 border: none;
-                border-radius: 0 25px 25px 0;
+                border-radius: 0;
                 color: white;
                 font-size: 20px;
                 cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
         }
 
@@ -85,6 +156,35 @@
             gap: 20px;
             font-size: 25px;
             color: #333;
+            align-items: center;
+
+            .user-auth-btn {
+                border: 0;
+                background: transparent;
+                padding: 0;
+                cursor: pointer;
+                color: inherit;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2px;
+                line-height: 1;
+
+                .icon {
+                    font-size: 30px;
+                }
+
+                .auth-label {
+                    font-size: 12px;
+                    font-weight: 1000;
+                    color: #333;
+                }
+
+                &:hover {
+                    opacity: 0.85;
+                }
+            }
 
             .cart-icon {
                 position: relative;
@@ -112,7 +212,7 @@
             gap: 30px;
             padding: 12px 0;
             color: white;
-            font-weight: 600;
+            font-weight: 500;
             font-size: 14px;
 
             li {
@@ -132,5 +232,48 @@
                 // Màu vàng nổi bật
             }
         }
+    }
+}
+
+@keyframes logo-shine {
+    0% {
+        transform: translateX(-220%) skewX(-18deg);
+    }
+
+    100% {
+        transform: translateX(420%) skewX(-18deg);
+    }
+}
+
+@keyframes logo-blink {
+
+    0%,
+    100% {
+        filter: brightness(1);
+    }
+
+    50% {
+        filter: brightness(1.12);
+    }
+}
+
+@keyframes logo-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 rgba(255, 145, 182, 0.0);
+    }
+
+    50% {
+        box-shadow: 0 0 16px rgba(255, 145, 182, 0.45);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .header-container .header-middle .logo::after,
+    .header-container .header-middle .logo::before,
+    .header-container .header-middle .logo img {
+        animation: none;
     }
 }
