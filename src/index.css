@@ -109,3 +109,20 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 } */
+
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600&display=swap");
+
+html,
+body,
+#root,
+button,
+input,
+textarea,
+select {
+  font-family: "Quicksand", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 300;
+}
+
+body {
+  margin: 0;
+}

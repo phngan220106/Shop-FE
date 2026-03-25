@@ -4,10 +4,12 @@
 html,
 body {
     margin: 0;
+    font-family: "Quicksand", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 300;
 }
 
 * {
-    font-family: 'Roboto';
+    font-family: inherit;
     padding: 0;
     margin: 0;
 }

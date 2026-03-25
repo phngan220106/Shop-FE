@@ -27,7 +27,6 @@ nav {
     justify-content: center;
     align-items: center;
     z-index: 9999;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
     .auth-modal {
         background: white;
@@ -64,7 +63,7 @@ nav {
                 text-transform: uppercase;
                 color: $text-black;
                 margin-bottom: 8px;
-                font-weight: 600;
+                font-weight: 500;
             }
 
             p {
@@ -114,7 +113,7 @@ nav {
                 border: none;
                 border-radius: 30px; // Bo tròn viên thuốc giống ảnh
                 font-size: 16px;
-                font-weight: bold;
+                font-weight: 500;
                 cursor: pointer;
                 transition: transform 0.2s, background 0.3s;
                 margin-top: 10px;
@@ -142,7 +141,7 @@ nav {
             .link-pink {
                 color: $primary-pink;
                 text-decoration: none;
-                font-weight: 600;
+                font-weight: 500;
                 cursor: pointer;
                 background: none;
                 border: none;
