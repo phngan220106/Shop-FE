@@ -1,4 +1,136 @@
-.header_top {
-    background: red;
+// .header_top {
+//     background: red;
 
+// }
+.header-container {
+    width: 100%;
+
+    .menu-list {
+        li {
+            a {
+                text-decoration: none; // Bỏ gạch chân
+                color: white; // Giữ màu trắng đúng thiết kế Lam Thảo
+                display: flex;
+                align-items: center;
+                gap: 8px;
+
+                &:hover {
+                    color: #fff176; // Đổi màu nhẹ khi rê chuột vào
+                }
+            }
+        }
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+
+    .header-top {
+        background-color: #00bfa5; // Màu xanh teal
+        color: white;
+        text-align: center;
+        padding: 8px 0;
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .header-middle {
+        background: white;
+        padding: 20px 0;
+
+        .content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .logo img {
+            height: 50px;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 500px;
+            position: relative;
+
+            input {
+                width: 100%;
+                padding: 10px 20px;
+                border-radius: 25px;
+                border: 1px solid #fce4ec;
+                background: #fce4ec44;
+                outline: none;
+            }
+
+            button {
+                position: absolute;
+                right: 0;
+                top: 0;
+                height: 100%;
+                width: 55px;
+                background: #f06292; // Màu hồng nút search
+                border: none;
+                border-radius: 0 25px 25px 0;
+                color: white;
+                font-size: 20px;
+                cursor: pointer;
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 20px;
+            font-size: 25px;
+            color: #333;
+
+            .cart-icon {
+                position: relative;
+
+                .badge {
+                    position: absolute;
+                    top: -5px;
+                    right: -10px;
+                    background: #333;
+                    color: white;
+                    font-size: 10px;
+                    padding: 2px 6px;
+                    border-radius: 50%;
+                }
+            }
+        }
+    }
+
+    .header-bottom {
+        background-color: #f48fb1; // Màu hồng menu
+
+        .menu-list {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+            padding: 12px 0;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+
+            li {
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+
+                &:hover {
+                    opacity: 0.8;
+                }
+
+                &.hot {
+                    color: #fff176;
+                }
+
+                // Màu vàng nổi bật
+            }
+        }
+    }
 }
