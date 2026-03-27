@@ -5,6 +5,10 @@ import BeautyBlog from "./pages/users/Blog/index.jsx";
 import ProductPage from "./pages/users/productPage/index.jsx";
 import Orders from "./pages/users/Orders/index.jsx";
 import Footer from "./pages/users/theme/footer/index.jsx";
+import returnPolicy from "./pages/users/returnPolicy/index.jsx";
+import shippingPolicy from "./pages/users/shippingPolicy/index.jsx";
+import privacyPolicy from "./pages/users/privacyPolicy/index.jsx";
+import termOfService from "./pages/users/termOfService/index.jsx";
 function App() {
   return (
     <BrowserRouter>
@@ -15,6 +19,10 @@ function App() {
         <Route path="/san-pham" element={<ProductPage />} />
         <Route path="/blog" element={<BeautyBlog />} />
         <Route path="/don-hang" element={<Orders />} />
+        <Route path="/return" element={<returnPolicy />} />
+        <Route path="/shipping" element={<shippingPolicy />} />
+        <Route path="/privacy" element={<privacyPolicy />} />
+        <Route path="/terms" element={<termOfService />} />
       </Routes>
       <Footer />
     </BrowserRouter>
