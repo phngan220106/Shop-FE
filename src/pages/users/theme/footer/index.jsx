@@ -2,7 +2,8 @@ import { memo } from "react";
 import { Link } from "react-router-dom";
 import { FaMapMarkerAlt, FaPhone, FaEnvelope } from "react-icons/fa";
 import "./style.scss";
-
+import { FaFacebookF, FaInstagram } from "react-icons/fa";
+import { SiShopee } from "react-icons/si";
 function Footer() {
     return (
         <footer className="rosee-footer">
@@ -17,9 +18,17 @@ function Footer() {
                     </p>
 
                     <div className="socials">
-                        <span>🔊</span>
-                        <span>🌐</span>
-                        <span>✉️</span>
+                        <a href="https://facebook.com" target="_blank">
+                            <FaFacebookF />
+                        </a>
+
+                        <a href="https://instagram.com" target="_blank">
+                            <FaInstagram />
+                        </a>
+
+                        <a href="https://shopee.vn" target="_blank">
+                            <SiShopee />
+                        </a>
                     </div>
                 </div>
 
