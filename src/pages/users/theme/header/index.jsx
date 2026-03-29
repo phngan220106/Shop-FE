@@ -15,6 +15,7 @@ import "./style.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineSearch, AiOutlineUser, AiOutlineShoppingCart, AiOutlineMenu } from "react-icons/ai";
 import AuthModal from "../../../../components/AuthModal";
+import CategoryMenu from "../../../../components/CategoryMenu";
 
 const Header = () => {
     const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -90,7 +91,7 @@ const Header = () => {
                 <div className="container">
                     <ul className="menu-list">
                         <li>
-                            <Link to="/san-pham"> SẢN PHẨM</Link>
+                            <CategoryMenu />
                         </li>
                         <li>
                             <Link to="/blog">BLOG</Link>

@@ -1,0 +1,83 @@
+.category-container {
+    position: relative;
+    display: inline-block;
+
+
+    /* 🔥 thay button thành text */
+    .category-button {
+        background: none;
+        /* bỏ nền vàng */
+        border: none;
+        color: white;
+        /* chữ trắng */
+        font-size: 14px;
+        /* giống BLOG */
+        cursor: pointer;
+        font-style: normal;
+        font-weight: 500;
+        padding: 10px 15px;
+        text-transform: uppercase;
+
+        &:hover {
+            color: #fff176; // Đổi màu nhẹ khi rê chuột vào
+        }
+
+    }
+
+    /* hover giống menu BLOG */
+    .category-button:hover {
+        opacity: 0.8;
+    }
+
+    // Khung dropdown
+    .category-dropdown {
+        position: absolute;
+        top: 100%; // Hiện ngay dưới button
+        left: 0;
+        width: 200px;
+        background-color: #ffffff; // Màu trắng rõ ràng
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1); // Đổ bóng để tách biệt với nền
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        border-radius: 4px;
+        z-index: 1000; // Đảm bảo đè lên banner
+
+        // Logic ẩn/hiện
+        display: none;
+
+        li {
+
+            border-bottom: 1px solid #f0f0f0;
+            width: 100%;
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            a {
+                flex: 1;
+                display: block;
+                padding: 12px 20px;
+                box-sizing: border-box;
+                color: #333333; // MÀU CHỮ QUAN TRỌNG: Phải là màu tối
+                text-decoration: none;
+                font-size: 14px;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    background-color: #fff0f3; // Màu hồng nhạt khi hover vào item
+                    color: #d23669; // Chữ đổi sang hồng đậm
+                    padding-left: 20px; // Hiệu ứng dịch sang phải nhẹ
+                }
+            }
+        }
+    }
+
+    // Hiển thị dropdown khi hover vào container
+    &:hover {
+        .category-dropdown {
+            display: block;
+        }
+    }
+}
