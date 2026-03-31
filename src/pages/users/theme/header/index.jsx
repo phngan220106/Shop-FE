@@ -13,11 +13,21 @@
 import { memo, useState } from "react";
 import "./style.scss";
 import { Link, useNavigate } from "react-router-dom";
-import { AiOutlineSearch, AiOutlineUser, AiOutlineShoppingCart, AiOutlineMenu } from "react-icons/ai";
+import { AiOutlineSearch, AiOutlineUser, AiOutlineShoppingCart, AiOutlineMenu, AiOutlineRight } from "react-icons/ai";
+import { FiBriefcase, FiShoppingBag, FiTag } from "react-icons/fi";
 import AuthModal from "../../../../components/AuthModal";
+import Cart from "../../../../components/Cart";
+
+const categoryItems = [
+    { label: "QUẦN ÁO", slug: "quan-ao", icon: FiShoppingBag },
+    { label: "GIÀY DÉP", slug: "giay-dep", icon: FiTag },
+    { label: "TÚI SÁCH", slug: "tui-sach", icon: FiBriefcase }
+];
 
 const Header = () => {
     const [isAuthOpen, setIsAuthOpen] = useState(false);
+    const [isCartOpen, setIsCartOpen] = useState(false);
+    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const [keyword, setKeyword] = useState("");
     const navigate = useNavigate();
 
@@ -33,11 +43,16 @@ const Header = () => {
         navigate(`/san-pham?tu-khoa=${encodeURIComponent(trimmedKeyword)}`);
     };
 
+    const handleCategorySelect = (slug) => {
+        setIsCategoryOpen(false);
+        navigate(`/san-pham/${slug}`);
+    };
+
     return (
         <header className="header-container">
             {/* Tầng 1: Banner xanh teal */}
             <div className="header-top">
-                <div className="container">
+                <div className="header-inner">
                     <div className="promo-marquee" aria-label="Khuyen mai">
                         <div className="promo-track">
                             <span>NHẬP MÃ T03FREESHIP30K - GIẢM NGAY 30K CHO ĐƠN HÀNG 199K</span>
@@ -49,7 +64,7 @@ const Header = () => {
 
             {/* Tầng 2: Trắng (Logo & Search) */}
             <div className="header-middle">
-                <div className="container content">
+                <div className="header-inner content">
                     <div className="logo">
                         {/* Thay bằng link logo thật của bạn nhé */}
                         <img src="./logo.png" alt="Logo" />
@@ -77,7 +92,7 @@ const Header = () => {
                             <AiOutlineUser className="icon" />
                             <span className="auth-label">Đăng nhập</span>
                         </button>
-                        <div className="cart-icon">
+                        <div className="cart-icon" onClick={() => setIsCartOpen(true)}>
                             <AiOutlineShoppingCart className="icon" />
                             <span className="badge">0</span>
                         </div>
@@ -87,10 +102,55 @@ const Header = () => {
 
             {/* Tầng 3: Hồng (Menu) */}
             <nav className="header-bottom">
-                <div className="container">
+                <div className="header-inner">
+                    {isCategoryOpen ? (
+                        <button
+                            type="button"
+                            className="category-backdrop"
+                            aria-label="Đóng danh mục sản phẩm"
+                            onClick={() => setIsCategoryOpen(false)}
+                        />
+                    ) : null}
                     <ul className="menu-list">
-                        <li>
-                            <Link to="/san-pham"> SẢN PHẨM</Link>
+                        <li className="category-menu">
+                            <button
+                                type="button"
+                                className="category-trigger"
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    setIsCategoryOpen((prev) => !prev);
+                                }}
+                                aria-expanded={isCategoryOpen}
+                                aria-label="Mở danh mục sản phẩm"
+                            >
+                                <AiOutlineMenu />
+                                <span>DANH MỤC SẢN PHẨM</span>
+                            </button>
+                            {isCategoryOpen && (
+                                <div className="category-dropdown">
+                                    <p className="dropdown-title">Dear Róse</p>
+                                    <ul>
+                                        {categoryItems.map((item) => (
+                                            <li key={item.label}>
+                                                <Link
+                                                    to={`/san-pham/${item.slug}`}
+                                                    className="category-item"
+                                                    onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        handleCategorySelect(item.slug);
+                                                    }}
+                                                >
+                                                    <span className="item-left">
+                                                        <item.icon className="cat-icon" />
+                                                        <span>{item.label}</span>
+                                                    </span>
+                                                    <AiOutlineRight />
+                                                </Link>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                         </li>
                         <li>
                             <Link to="/blog">BLOG</Link>
@@ -104,6 +164,7 @@ const Header = () => {
             </nav>
 
             {isAuthOpen && <AuthModal onClose={() => setIsAuthOpen(false)} />}
+            {isCartOpen && <Cart onClose={() => setIsCartOpen(false)} />}
         </header>
     );
 };
