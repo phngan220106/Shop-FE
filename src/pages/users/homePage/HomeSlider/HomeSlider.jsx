@@ -62,7 +62,7 @@ function HomeSlider() {
                             <img src={slide.img} alt={slide.title} className="main-img" />
 
                             <div className="slide-content">
-                                <Link to="/category/quan-ao" className="btn-shop">Mua ngay</Link>
+                                <Link to="/san-pham/quan-ao" className="btn-shop">Mua ngay</Link>
                             </div>
                         </div>
                     </SwiperSlide>
