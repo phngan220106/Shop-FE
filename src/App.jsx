@@ -10,6 +10,7 @@ import returnPolicy from "./pages/users/returnPolicy/index.jsx";
 import shippingPolicy from "./pages/users/shippingPolicy/index.jsx";
 import privacyPolicy from "./pages/users/privacyPolicy/index.jsx";
 import termOfService from "./pages/users/termOfService/index.jsx";
+
 function App() {
   return (
     <BrowserRouter>

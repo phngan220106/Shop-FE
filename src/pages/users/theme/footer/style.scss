@@ -67,7 +67,7 @@
         display: flex;
         gap: 10px;
 
-        span {
+        a {
             width: 32px;
             height: 32px;
             background: #fff;
@@ -75,8 +75,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
+            color: #555;
+            font-size: 14px;
+            transition: 0.3s;
             box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+        }
+
+        a:hover {
+            color: #fff;
+            background: #d94c7b; // màu hồng giống brand
         }
     }
 
