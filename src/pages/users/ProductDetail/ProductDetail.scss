@@ -1,0 +1,30 @@
+.product-detail {
+    display: flex;
+    gap: 40px;
+    padding: 40px;
+
+    img {
+        width: 300px;
+        object-fit: contain;
+    }
+
+    .info {
+        h2 {
+            font-size: 24px;
+        }
+
+        .price {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: black;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    }
+}

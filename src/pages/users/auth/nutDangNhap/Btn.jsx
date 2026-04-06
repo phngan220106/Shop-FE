@@ -19,7 +19,9 @@ function Btn() {
             {isAuthOpen && (
                 <AuthModal onClose={() => setIsAuthOpen(false)} />
             )}
+
         </header>
+
     );
 }
 

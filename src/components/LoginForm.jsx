@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
-function LoginForm() {
+function LoginForm({ onClose }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { login } = useContext(AuthContext);
 
     const handleLogin = (e) => {
         e.preventDefault();
@@ -14,7 +16,9 @@ function LoginForm() {
         }
 
         if (email === user.email && password === user.password) {
+            login(user);
             alert("Đăng nhập thành công!");
+            onClose(); // đóng modal
         } else {
             alert("Sai tài khoản hoặc mật khẩu!");
         }

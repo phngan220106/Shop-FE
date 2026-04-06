@@ -1,15 +1,4 @@
-// import { memo } from "react";
-// import './style.scss';
-// const Header = () => {
-//     return (
-//         <div className="header_top">
-//             <div className="container">
-//                 Header
-//             </div>
-//         </div>
-//     );
-// }
-// export default memo(Header);
+
 import { memo, useState } from "react";
 import "./style.scss";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,14 +6,15 @@ import { AiOutlineSearch, AiOutlineUser, AiOutlineShoppingCart, AiOutlineMenu, A
 import { FiBriefcase, FiShoppingBag, FiTag } from "react-icons/fi";
 import AuthModal from "../../../../components/AuthModal";
 import Cart from "../../../../components/Cart";
-
+import { useContext } from "react";
+import { AuthContext } from "../../../../context/AuthContext";
 const categoryItems = [
     { label: "QUẦN ÁO", slug: "quan-ao", icon: FiShoppingBag },
     { label: "GIÀY DÉP", slug: "giay-dep", icon: FiTag },
     { label: "TÚI SÁCH", slug: "tui-sach", icon: FiBriefcase }
 ];
-
 const Header = () => {
+    const { user, logout } = useContext(AuthContext);
     const [isAuthOpen, setIsAuthOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -45,7 +35,7 @@ const Header = () => {
 
     const handleCategorySelect = (slug) => {
         setIsCategoryOpen(false);
-        navigate(`/san-pham/${slug}`);
+        navigate(`/category/${slug}`);
     };
 
     return (
@@ -65,10 +55,10 @@ const Header = () => {
             {/* Tầng 2: Trắng (Logo & Search) */}
             <div className="header-middle">
                 <div className="header-inner content">
-                    <div className="logo">
+                    <Link to="/" className="logo">
                         {/* Thay bằng link logo thật của bạn nhé */}
                         <img src="./logo.png" alt="Logo" />
-                    </div>
+                    </Link>
 
                     <form className="search-box" onSubmit={handleSearch}>
                         <input
@@ -83,15 +73,27 @@ const Header = () => {
                     </form>
 
                     <div className="header-actions">
-                        <button
-                            type="button"
-                            className="user-auth-btn"
-                            onClick={() => setIsAuthOpen(true)}
-                            aria-label="Đăng nhập"
-                        >
-                            <AiOutlineUser className="icon" />
-                            <span className="auth-label">Đăng nhập</span>
-                        </button>
+                        {user ? (
+                            <button
+                                type="button"
+                                className="user-auth-btn"
+                                onClick={logout}
+                                aria-label="Đăng xuất"
+                            >
+                                <AiOutlineUser className="icon" />
+                                <span className="auth-label">Đăng xuất</span>
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                className="user-auth-btn"
+                                onClick={() => setIsAuthOpen(true)}
+                                aria-label="Đăng nhập"
+                            >
+                                <AiOutlineUser className="icon" />
+                                <span className="auth-label">Đăng nhập</span>
+                            </button>
+                        )}
                         <div className="cart-icon" onClick={() => setIsCartOpen(true)}>
                             <AiOutlineShoppingCart className="icon" />
                             <span className="badge">0</span>
@@ -133,7 +135,7 @@ const Header = () => {
                                         {categoryItems.map((item) => (
                                             <li key={item.label}>
                                                 <Link
-                                                    to={`/san-pham/${item.slug}`}
+                                                    to={`/category/${item.slug}`}
                                                     className="category-item"
                                                     onClick={(event) => {
                                                         event.stopPropagation();
@@ -151,6 +153,9 @@ const Header = () => {
                                     </ul>
                                 </div>
                             )}
+                        </li>
+                        <li>
+                            <Link to="/">TRANG CHỦ</Link>
                         </li>
                         <li>
                             <Link to="/blog">BLOG</Link>

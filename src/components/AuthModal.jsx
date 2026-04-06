@@ -2,10 +2,10 @@ import { useState } from "react";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 import "../style/pages/login.scss";
+
 function AuthModal({ onClose }) {
     // 2. State để chuyển đổi qua lại giữa Login và Register
     const [isLogin, setIsLogin] = useState(true);
-
     return (
         <div className="auth-overlay">
             <div className="auth-modal">
@@ -23,7 +23,7 @@ function AuthModal({ onClose }) {
                 </div>
 
                 {/* 4. Hiển thị Form tương ứng dựa trên isLogin */}
-                {isLogin ? <LoginForm /> : <RegisterForm />}
+                {isLogin ? <LoginForm onClose={onClose} /> : <RegisterForm />}
 
                 {/* 5. Footer chứa nút bấm để chuyển đổi trạng thái */}
                 <div className="auth-footer">

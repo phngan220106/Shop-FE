@@ -8,6 +8,7 @@ import shippingPolicy from "../pages/users/shippingPolicy/index.jsx";
 import privacyPolicy from "../pages/users/privacyPolicy/index.jsx";
 import termOfService from "../pages/users/termOfService/index.jsx";
 import CategoryPage from "../pages/users/CategoryPage/index.jsx";
+import ProductDetail from "../pages/users/ProductDetail/ProducDetail.jsx";
 function AppRoutes() {
     return (
         <div>
@@ -25,6 +26,7 @@ function AppRoutes() {
                 <Route path="/privacy" element={<privacyPolicy />} />
                 <Route path="/terms" element={<termOfService />} />
                 <Route path="/category/:slug" element={<CategoryPage />} />
+                <Route path="/san-pham/:id" element={<ProductDetail />} />
             </Routes>
 
 
