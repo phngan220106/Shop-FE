@@ -5,7 +5,6 @@
 // import "./style.scss";
 
 import { memo } from 'react';
-import { Link } from "react-router-dom";
 import HomeSlider from './HomeSlider/HomeSlider.jsx';
 import "./style.scss";
 import BestSeller from '../../../components/BestSeller/BestSeller.jsx';
