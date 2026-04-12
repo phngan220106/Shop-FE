@@ -15,7 +15,7 @@ function HomeSlider() {
     const slides = [
         {
             id: 1,
-            title: "Dear Rose Collection",
+            title: "Dear Róse Collection",
             desc: "Nhẹ nhàng, ngọt ngào và đầy nữ tính.",
             img: banner1 // Thay bằng đường dẫn ảnh của bạn
         },
@@ -62,7 +62,7 @@ function HomeSlider() {
                             <img src={slide.img} alt={slide.title} className="main-img" />
 
                             <div className="slide-content">
-                                <Link to="/san-pham/quan-ao" className="btn-shop">Mua ngay</Link>
+                                <Link to="/category/quan-ao" className="btn-shop">Mua ngay</Link>
                             </div>
                         </div>
                     </SwiperSlide>
