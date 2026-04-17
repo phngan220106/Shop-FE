@@ -1,19 +1,30 @@
 // src/App.jsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, useLocation } from "react-router-dom";
 import "./App.css";
 import AppRoutes from "./routes/default.jsx";
 import Header from "./pages/users/theme/header/index.jsx";
 import Footer from "./pages/users/theme/footer/index.jsx";
+import CheckoutHeader from "./pages/users/Checkout/CheckoutHeader.jsx";
+
+function AppShell() {
+  const location = useLocation();
+  const isCheckoutPage = location.pathname.startsWith("/thanh-toan");
+
+  return (
+    <div className="app-shell">
+      {isCheckoutPage ? <CheckoutHeader /> : <Header />}
+      <main className="app-content">
+        <AppRoutes />
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
-      <div className="app-shell">
-        <Header />
-        <main className="app-content">
-          <AppRoutes />
-        </main>
-        <Footer />
-      </div>
+      <AppShell />
     </BrowserRouter>
   );
 }

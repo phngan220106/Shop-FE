@@ -1,20 +1,22 @@
-
-import { memo, useState } from "react";
+import { memo, useState, useContext } from "react";
 import "./style.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineSearch, AiOutlineUser, AiOutlineShoppingCart, AiOutlineMenu, AiOutlineRight } from "react-icons/ai";
 import { FiBriefcase, FiShoppingBag, FiTag } from "react-icons/fi";
 import AuthModal from "../../../../components/AuthModal";
 import Cart from "../../../../components/Cart";
-import { useContext } from "react";
 import { AuthContext } from "../../../../context/AuthContext";
+import { CartContext } from "../../../../context/CartContext";
+
 const categoryItems = [
     { label: "QUẦN ÁO", slug: "quan-ao", icon: FiShoppingBag },
     { label: "GIÀY DÉP", slug: "giay-dep", icon: FiTag },
     { label: "TÚI SÁCH", slug: "tui-sach", icon: FiBriefcase }
 ];
+
 const Header = () => {
     const { user, logout } = useContext(AuthContext);
+    const { cartCount } = useContext(CartContext);
     const [isAuthOpen, setIsAuthOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -40,7 +42,6 @@ const Header = () => {
 
     return (
         <header className="header-container">
-            {/* Tầng 1: Banner xanh teal */}
             <div className="header-top">
                 <div className="header-inner">
                     <div className="promo-marquee" aria-label="Khuyen mai">
@@ -52,11 +53,9 @@ const Header = () => {
                 </div>
             </div>
 
-            {/* Tầng 2: Trắng (Logo & Search) */}
             <div className="header-middle">
                 <div className="header-inner content">
                     <Link to="/" className="logo">
-                        {/* Thay bằng link logo thật của bạn nhé */}
                         <img src="./logo.png" alt="Logo" />
                     </Link>
 
@@ -96,13 +95,12 @@ const Header = () => {
                         )}
                         <div className="cart-icon" onClick={() => setIsCartOpen(true)}>
                             <AiOutlineShoppingCart className="icon" />
-                            <span className="badge">0</span>
+                            <span className="badge">{cartCount}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Tầng 3: Hồng (Menu) */}
             <nav className="header-bottom">
                 <div className="header-inner">
                     {isCategoryOpen ? (
@@ -163,7 +161,6 @@ const Header = () => {
                         <li>
                             <Link to="/don-hang">ĐƠN HÀNG</Link>
                         </li>
-
                     </ul>
                 </div>
             </nav>

@@ -4,6 +4,7 @@ export const products = [
         name: "Pearl Top (áo dây bên ngoài) - Remmus | Áo hai dây xuyên thấu silver nhún ngực cho nữ",
         price: 199000,
         image: "https://down-vn.img.susercontent.com/file/vn-11134207-7ra0g-m9d3pk1b45frac.webp",
+
         description: "Áo thun cotton 100%, thoáng mát, dễ phối đồ",
         category: "Áo",
         stock: 50,
