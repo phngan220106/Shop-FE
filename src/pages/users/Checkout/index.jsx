@@ -1,22 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
-import { FaMoneyBillWave } from "react-icons/fa";
-import { MdQrCode2 } from "react-icons/md";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { FaCheckCircle, FaMoneyBillWave } from "react-icons/fa";
+import { MdContentCopy, MdQrCode2 } from "react-icons/md";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { regionApi } from "../../../apis/region.js";
+import { buildCreateOrderPayload, orderApi, ORDER_PAYMENT_METHODS } from "../../../apis/order.js";
+import { CartContext } from "../../../context/CartContext.jsx";
 import { products } from "../../../data/product.js";
 import "./style.scss";
 
 const SHIPPING_FEE = 35000;
 const COUPON_DISCOUNT = 30000;
-const REGION_API_BASE_URL = "https://provinces.open-api.vn/api/v1";
 
 const formatCurrency = (value) => `${value.toLocaleString("vi-VN")} VND`;
 
 function CheckoutPage() {
     const location = useLocation();
     const [searchParams] = useSearchParams();
+    const { cartItems, removeFromCart } = useContext(CartContext);
     const productId = Number(searchParams.get("productId"));
     const product = products.find((item) => item.id === productId) ?? products[0];
-    const fallbackItem = {
+    const fallbackItem = useMemo(() => ({
         id: product.id,
         name: product.name,
         image: product.image,
@@ -24,7 +27,7 @@ function CheckoutPage() {
         color: "Cream",
         size: "S",
         quantity: 1
-    };
+    }), [product]);
 
     const checkoutItems = useMemo(() => {
         const stateItems = location.state?.checkoutItems;
@@ -37,18 +40,19 @@ function CheckoutPage() {
             return [location.state.checkoutItem];
         }
 
+        if (cartItems.length > 0) {
+            return cartItems;
+        }
+
         return [fallbackItem];
-    }, [fallbackItem, location.state]);
+    }, [cartItems, fallbackItem, location.state]);
 
     const [formData, setFormData] = useState({
         country: "Vietnam",
         fullName: "",
-        address: "",
         addressDetail: "",
-        apartment: "",
         city: "",
         cityCode: "",
-        postalCode: "",
         district: "",
         districtCode: "",
         ward: "",
@@ -58,8 +62,13 @@ function CheckoutPage() {
     });
     const [couponCode, setCouponCode] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState("");
-    const [paymentMethod, setPaymentMethod] = useState("cod");
-    const [isOrderPlaced, setIsOrderPlaced] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState(ORDER_PAYMENT_METHODS.QR);
+    const [checkoutStep, setCheckoutStep] = useState("form");
+    const [copiedField, setCopiedField] = useState("");
+    const [orderData, setOrderData] = useState(null);
+    const [orderError, setOrderError] = useState("");
+    const [isCreatingOrder, setIsCreatingOrder] = useState(false);
+    const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
@@ -75,30 +84,36 @@ function CheckoutPage() {
     const couponDiscount = appliedCoupon ? COUPON_DISCOUNT : 0;
     const total = subtotal + SHIPPING_FEE - couponDiscount;
 
+    const paymentInfo = orderData?.paymentInfo ?? {
+        qrCodeUrl: "",
+        transferContent: "",
+        amount: total,
+        bankInfo: {
+            bankName: "",
+            accountName: "",
+            accountNumber: ""
+        }
+    };
+
     useEffect(() => {
-        const controller = new AbortController();
+        let isMounted = true;
 
         async function loadProvinces() {
             setIsLoadingProvinces(true);
             setRegionError("");
 
             try {
-                const response = await fetch(`${REGION_API_BASE_URL}/p/`, {
-                    signal: controller.signal
-                });
+                const data = await regionApi.getProvinces();
 
-                if (!response.ok) {
-                    throw new Error("Khong the tai danh sach tinh/thanh pho.");
+                if (isMounted) {
+                    setProvinces(data);
                 }
-
-                const data = await response.json();
-                setProvinces(Array.isArray(data) ? data : []);
-            } catch (error) {
-                if (error.name !== "AbortError") {
+            } catch {
+                if (isMounted) {
                     setRegionError("Khong tai duoc du lieu dia chi tu VN Region API.");
                 }
             } finally {
-                if (!controller.signal.aborted) {
+                if (isMounted) {
                     setIsLoadingProvinces(false);
                 }
             }
@@ -106,7 +121,9 @@ function CheckoutPage() {
 
         loadProvinces();
 
-        return () => controller.abort();
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     useEffect(() => {
@@ -116,29 +133,24 @@ function CheckoutPage() {
             return;
         }
 
-        const controller = new AbortController();
+        let isMounted = true;
 
         async function loadDistricts() {
             setIsLoadingDistricts(true);
             setRegionError("");
 
             try {
-                const response = await fetch(`${REGION_API_BASE_URL}/p/${formData.cityCode}?depth=2`, {
-                    signal: controller.signal
-                });
+                const data = await regionApi.getDistricts(formData.cityCode);
 
-                if (!response.ok) {
-                    throw new Error("Khong the tai danh sach quan/huyen.");
+                if (isMounted) {
+                    setDistricts(data);
                 }
-
-                const data = await response.json();
-                setDistricts(Array.isArray(data?.districts) ? data.districts : []);
-            } catch (error) {
-                if (error.name !== "AbortError") {
+            } catch {
+                if (isMounted) {
                     setRegionError("Khong tai duoc quan/huyen cho tinh thanh da chon.");
                 }
             } finally {
-                if (!controller.signal.aborted) {
+                if (isMounted) {
                     setIsLoadingDistricts(false);
                 }
             }
@@ -146,7 +158,9 @@ function CheckoutPage() {
 
         loadDistricts();
 
-        return () => controller.abort();
+        return () => {
+            isMounted = false;
+        };
     }, [formData.cityCode]);
 
     useEffect(() => {
@@ -155,29 +169,24 @@ function CheckoutPage() {
             return;
         }
 
-        const controller = new AbortController();
+        let isMounted = true;
 
         async function loadWards() {
             setIsLoadingWards(true);
             setRegionError("");
 
             try {
-                const response = await fetch(`${REGION_API_BASE_URL}/d/${formData.districtCode}?depth=2`, {
-                    signal: controller.signal
-                });
+                const data = await regionApi.getWards(formData.districtCode);
 
-                if (!response.ok) {
-                    throw new Error("Khong the tai danh sach phuong/xa.");
+                if (isMounted) {
+                    setWards(data);
                 }
-
-                const data = await response.json();
-                setWards(Array.isArray(data?.wards) ? data.wards : []);
-            } catch (error) {
-                if (error.name !== "AbortError") {
+            } catch {
+                if (isMounted) {
                     setRegionError("Khong tai duoc phuong/xa cho quan huyen da chon.");
                 }
             } finally {
-                if (!controller.signal.aborted) {
+                if (isMounted) {
                     setIsLoadingWards(false);
                 }
             }
@@ -185,8 +194,27 @@ function CheckoutPage() {
 
         loadWards();
 
-        return () => controller.abort();
+        return () => {
+            isMounted = false;
+        };
     }, [formData.districtCode]);
+
+    useEffect(() => {
+        if (!copiedField) {
+            return undefined;
+        }
+
+        const timer = window.setTimeout(() => setCopiedField(""), 1800);
+        return () => window.clearTimeout(timer);
+    }, [copiedField]);
+
+    const clearPurchasedCartItems = () => {
+        checkoutItems.forEach((item) => {
+            if (item.cartKey) {
+                removeFromCart(item.cartKey);
+            }
+        });
+    };
 
     const handleInputChange = ({ target }) => {
         const { name, value } = target;
@@ -242,187 +270,368 @@ function CheckoutPage() {
         setAppliedCoupon(normalizedCode === "DEARROSE30" ? normalizedCode : "");
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        setIsOrderPlaced(true);
+        setOrderError("");
+        setIsCreatingOrder(true);
+
+        try {
+            const payload = buildCreateOrderPayload({
+                customer: {
+                    fullName: formData.fullName,
+                    phone: formData.phone
+                },
+                shippingAddress: {
+                    country: formData.country,
+                    city: formData.city,
+                    district: formData.district,
+                    ward: formData.ward,
+                    addressLine: formData.addressDetail
+                },
+                items: checkoutItems,
+                paymentMethod,
+                couponCode: appliedCoupon,
+                note: formData.note
+            });
+
+            const createdOrder = await orderApi.createOrder(payload);
+            setOrderData(createdOrder);
+
+            if (createdOrder.paymentMethod === ORDER_PAYMENT_METHODS.COD) {
+                clearPurchasedCartItems();
+                setCheckoutStep("success");
+                return;
+            }
+
+            setCheckoutStep("payment");
+        } catch (error) {
+            setOrderError(
+                error?.response?.data?.message || "Khong tao duoc don hang. Vui long thu lai."
+            );
+        } finally {
+            setIsCreatingOrder(false);
+        }
+    };
+
+    const handleConfirmTransfer = async () => {
+        if (!orderData?.orderCode) {
+            return;
+        }
+
+        setOrderError("");
+        setIsConfirmingPayment(true);
+
+        try {
+            await orderApi.confirmPayment({
+                orderCode: orderData.orderCode
+            });
+
+            clearPurchasedCartItems();
+            setCheckoutStep("success");
+        } catch (error) {
+            setOrderError(
+                error?.response?.data?.message || "Khong xac nhan duoc thanh toan. Vui long thu lai."
+            );
+        } finally {
+            setIsConfirmingPayment(false);
+        }
+    };
+
+    const handleCopy = async (value, key) => {
+        try {
+            await navigator.clipboard.writeText(value);
+            setCopiedField(key);
+        } catch {
+            setCopiedField("");
+        }
     };
 
     return (
         <section className="checkout-page">
             <form className="checkout-layout" onSubmit={handleSubmit}>
                 <div className="checkout-main">
-
-                    <div className="checkout-columns">
-                        <div className="checkout-column">
-                            <div className="section-heading section-heading-inline">
-                                <h1>Thông tin mua hàng</h1>
-                                <p>Nhập đầy đủ thông tin liên hệ để tạo đơn hàng.</p>
-                            </div>
-
-                            <div className="field-list">
-                                <select name="country" value={formData.country} onChange={handleInputChange}>
-                                    <option value="Vietnam">Vietnam</option>
-                                </select>
-
-                                <input
-                                    name="fullName"
-                                    placeholder="Họ và tên"
-                                    value={formData.fullName}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-
-                                <input
-                                    name="phone"
-                                    placeholder="Số điện thoại"
-                                    value={formData.phone}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-
-                                <input
-                                    name="addressDetail"
-                                    placeholder="Số nhà, tên đường, toà nhà..."
-                                    value={formData.addressDetail}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-
-                                <textarea
-                                    name="note"
-                                    rows="4"
-                                    placeholder="Ghi chú đơn hàng"
-                                    value={formData.note}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="checkout-column">
-                            <div className="section-heading section-heading-inline">
-                                <h2>Vận chuyển</h2>
-                                <div className="shipping-alert">Vui lòng nhập thông tin giao hàng.</div>
-                            </div>
-
-                            <div className="field-list">
-                                <div className="grid-two">
-                                    <select
-                                        name="cityCode"
-                                        value={formData.cityCode}
-                                        onChange={handleProvinceChange}
-                                        required
-                                        disabled={isLoadingProvinces}
-                                    >
-                                        <option value="">
-                                            {isLoadingProvinces ? "Dang tai..." : "Chọn Tỉnh/Thành phố"}
-                                        </option>
-                                        {provinces.map((province) => (
-                                            <option key={province.code} value={province.code}>
-                                                {province.name}
-                                            </option>
-                                        ))}
-                                    </select>
-
-                                    <select
-                                        name="districtCode"
-                                        value={formData.districtCode}
-                                        onChange={handleDistrictChange}
-                                        required
-                                        disabled={!formData.cityCode || isLoadingDistricts}
-                                    >
-                                        <option value="">
-                                            {!formData.cityCode
-                                                ? "Chon Quan/Huyen"
-                                                : isLoadingDistricts
-                                                    ? "Dang tai quan/huyen..."
-                                                    : "Chọn Quận/Huyện"}
-                                        </option>
-                                        {districts.map((district) => (
-                                            <option key={district.code} value={district.code}>
-                                                {district.name}
-                                            </option>
-                                        ))}
-                                    </select>
+                    {checkoutStep === "form" ? (
+                        <div className="checkout-columns">
+                            <div className="checkout-column">
+                                <div className="section-heading section-heading-inline">
+                                    <h1>Thông tin mua hàng</h1>
+                                    <p>Nhập đầy đủ thông tin liên hệ để tạo đơn hàng.</p>
                                 </div>
 
-                                <div className="grid-two">
-                                    <select
-                                        name="wardCode"
-                                        value={formData.wardCode}
-                                        onChange={handleWardChange}
-                                        required
-                                        disabled={!formData.districtCode || isLoadingWards}
-                                    >
-                                        <option value="">
-                                            {!formData.districtCode
-                                                ? "Chon Phuong/Xa"
-                                                : isLoadingWards
-                                                    ? "Dang tai phuong/xa..."
-                                                    : "Chọn Phường/Xã"}
-                                        </option>
-                                        {wards.map((ward) => (
-                                            <option key={ward.code} value={ward.code}>
-                                                {ward.name}
-                                            </option>
-                                        ))}
+                                <div className="field-list">
+                                    <select name="country" value={formData.country} onChange={handleInputChange}>
+                                        <option value="Vietnam">Việt Nam</option>
                                     </select>
 
+                                    <input
+                                        name="fullName"
+                                        placeholder="Họ và tên"
+                                        value={formData.fullName}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
 
+                                    <input
+                                        name="phone"
+                                        placeholder="Số điện thoại"
+                                        value={formData.phone}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+
+                                    <input
+                                        name="addressDetail"
+                                        placeholder="Số nhà, tên đường, tòa nhà ..."
+                                        value={formData.addressDetail}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+
+                                    <textarea
+                                        name="note"
+                                        rows="4"
+                                        placeholder="Ghi chú đơn hàng"
+                                        value={formData.note}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="checkout-column">
+                                <div className="section-heading section-heading-inline">
+                                    <h2>Van chuyen</h2>
+                                    <div className="shipping-alert">Vui lòng nhập thông tin giao hàng .</div>
                                 </div>
 
-                                {regionError ? <p className="field-message error">{regionError}</p> : null}
-                            </div>
+                                <div className="field-list">
+                                    <div className="grid-two">
+                                        <select
+                                            name="cityCode"
+                                            value={formData.cityCode}
+                                            onChange={handleProvinceChange}
+                                            required
+                                            disabled={isLoadingProvinces}
+                                        >
+                                            <option value="">
+                                                {isLoadingProvinces ? "Dang tai..." : "Chọn Tỉnh/Thành phố"}
+                                            </option>
+                                            {provinces.map((province) => (
+                                                <option key={province.code} value={province.code}>
+                                                    {province.name}
+                                                </option>
+                                            ))}
+                                        </select>
 
-                            <div className="checkout-block checkout-block-compact">
-                                <h2>Thanh toán</h2>
-                                <p className="helper-text">Toàn bộ giao dịch được bảo mật và mã hóa.</p>
-
-                                <label className={`payment-card ${paymentMethod === "cod" ? "selected" : ""}`}>
-                                    <input
-                                        type="radio"
-                                        name="paymentMethod"
-                                        value="cod"
-                                        checked={paymentMethod === "cod"}
-                                        onChange={(event) => setPaymentMethod(event.target.value)}
-                                    />
-                                    <span className="payment-icon payment-icon-cod" aria-hidden="true">
-                                        <FaMoneyBillWave />
-                                    </span>
-                                    <div>
-                                        <strong>(COD) Thanh toán khi nhận hàng</strong>
+                                        <select
+                                            name="districtCode"
+                                            value={formData.districtCode}
+                                            onChange={handleDistrictChange}
+                                            required
+                                            disabled={!formData.cityCode || isLoadingDistricts}
+                                        >
+                                            <option value="">
+                                                {!formData.cityCode
+                                                    ? "Chọn Quận/Huyện"
+                                                    : isLoadingDistricts
+                                                        ? "Dang tai quan/huyen..."
+                                                        : "Chon Quan/Huyen"}
+                                            </option>
+                                            {districts.map((district) => (
+                                                <option key={district.code} value={district.code}>
+                                                    {district.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
-                                </label>
 
-                                <label className={`payment-card ${paymentMethod === "vnpay" ? "selected" : ""}`}>
-                                    <input
-                                        type="radio"
-                                        name="paymentMethod"
-                                        value="vnpay"
-                                        checked={paymentMethod === "vnpay"}
-                                        onChange={(event) => setPaymentMethod(event.target.value)}
-                                    />
-                                    <span className="payment-icon payment-icon-vnpay" aria-hidden="true">
-                                        <MdQrCode2 />
-                                    </span>
-                                    <div>
-                                        <strong>VNPay QR</strong>
+                                    <div className="grid-two">
+                                        <select
+                                            name="wardCode"
+                                            value={formData.wardCode}
+                                            onChange={handleWardChange}
+                                            required
+                                            disabled={!formData.districtCode || isLoadingWards}
+                                        >
+                                            <option value="">
+                                                {!formData.districtCode
+                                                    ? "Chọn Phường/Xã"
+                                                    : isLoadingWards
+                                                        ? "Đang tải phường/xã..."
+                                                        : "Chọn Phường/Xã"}
+                                            </option>
+                                            {wards.map((ward) => (
+                                                <option key={ward.code} value={ward.code}>
+                                                    {ward.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
-                                </label>
-                            </div>
 
-                            <div className="checkout-block checkout-block-compact">
-                                <h2>Phương thức vận chuyển</h2>
-                                <label className="option-card selected">
-                                    <input type="radio" checked readOnly />
-                                    <span>Giao hàng tiêu chuẩn </span>
-                                </label>
+                                    {regionError ? <p className="field-message error">{regionError}</p> : null}
+                                </div>
+
+                                <div className="checkout-block checkout-block-compact">
+                                    <h2>Thanh toan</h2>
+                                    <p className="helper-text">Chọn hình thức thanh toán đơn hàng.</p>
+
+                                    <label className={`payment-card ${paymentMethod === ORDER_PAYMENT_METHODS.COD ? "selected" : ""}`}>
+                                        <input
+                                            type="radio"
+                                            name="paymentMethod"
+                                            value={ORDER_PAYMENT_METHODS.COD}
+                                            checked={paymentMethod === ORDER_PAYMENT_METHODS.COD}
+                                            onChange={(event) => setPaymentMethod(event.target.value)}
+                                        />
+                                        <span className="payment-icon payment-icon-cod" aria-hidden="true">
+                                            <FaMoneyBillWave />
+                                        </span>
+                                        <div>
+                                            <strong>(COD) Thanh toán khi nhận hàng</strong>
+
+                                        </div>
+                                    </label>
+
+                                    <label className={`payment-card ${paymentMethod === ORDER_PAYMENT_METHODS.QR ? "selected" : ""}`}>
+                                        <input
+                                            type="radio"
+                                            name="paymentMethod"
+                                            value={ORDER_PAYMENT_METHODS.QR}
+                                            checked={paymentMethod === ORDER_PAYMENT_METHODS.QR}
+                                            onChange={(event) => setPaymentMethod(event.target.value)}
+                                        />
+                                        <span className="payment-icon payment-icon-vnpay" aria-hidden="true">
+                                            <MdQrCode2 />
+                                        </span>
+                                        <div>
+                                            <strong>Chuyển khoản QR</strong>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div className="checkout-block checkout-block-compact">
+                                    <h2>Phương thức vận chuyển</h2>
+                                    <label className="option-card selected">
+                                        <input type="radio" checked readOnly />
+                                        <span>Giao hàng tiêu chuẩn</span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    {isOrderPlaced ? (
-                        <p className="success-message">Don hang mau da duoc tao. Ban co the noi buoc nay voi API thanh toan sau.</p>
                     ) : null}
+
+                    {checkoutStep === "payment" ? (
+                        <div className="payment-step">
+                            <div className="section-heading section-heading-inline">
+                                <h1>Thanh toán đơn hàng</h1>
+                            </div>
+
+                            <div className="payment-transfer-layout">
+                                <div className="payment-qr-card">
+                                    {paymentInfo.qrCodeUrl ? (
+                                        <img src={paymentInfo.qrCodeUrl} alt="QR thanh toan don hang" />
+                                    ) : (
+                                        <div className="qr-placeholder">QR dang duoc backend cap nhat</div>
+                                    )}
+                                    <strong>Số tiền cần thanh toán</strong>
+                                    <p className="payment-amount">{formatCurrency(paymentInfo.amount || total)}</p>
+                                    <p className="payment-caption">Nội dung chuyển khoản: {paymentInfo.transferContent}</p>
+                                </div>
+
+                                <div className="payment-info-card">
+                                    <div className="payment-info-row">
+                                        <span>Mã đơn hàng</span>
+                                        <strong>{orderData?.orderCode}</strong>
+                                    </div>
+                                    <div className="payment-info-row">
+                                        <span>Ngân hàng</span>
+                                        <strong>{paymentInfo.bankInfo.bankName}</strong>
+                                    </div>
+                                    <div className="payment-info-row with-action">
+                                        <div>
+                                            <span>Số tài khoản</span>
+                                            <strong>{paymentInfo.bankInfo.accountNumber}</strong>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="copy-btn"
+                                            onClick={() => handleCopy(paymentInfo.bankInfo.accountNumber, "account")}
+                                        >
+                                            <MdContentCopy />
+                                            {copiedField === "account" ? "Da copy" : "Copy"}
+                                        </button>
+                                    </div>
+                                    <div className="payment-info-row">
+                                        <span>Chủ tài khoản</span>
+                                        <strong>{paymentInfo.bankInfo.accountName}</strong>
+                                    </div>
+                                    <div className="payment-info-row with-action">
+                                        <div>
+                                            <span>Nội dung</span>
+                                            <strong>{paymentInfo.transferContent}</strong>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="copy-btn"
+                                            onClick={() => handleCopy(paymentInfo.transferContent, "content")}
+                                        >
+                                            <MdContentCopy />
+                                            {copiedField === "content" ? "Da copy" : "Copy"}
+                                        </button>
+                                    </div>
+
+                                    <div className="payment-step-actions">
+                                        <button
+                                            type="button"
+                                            className="secondary-action-btn"
+                                            onClick={() => setCheckoutStep("form")}
+                                            disabled={isConfirmingPayment}
+                                        >
+                                            Quay lại thông tin
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="place-order-btn"
+                                            onClick={handleConfirmTransfer}
+                                            disabled={isConfirmingPayment}
+                                        >
+                                            {isConfirmingPayment ? "Đang xác nhận..." : "Tôi đã chuyển khoản"}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : null}
+
+                    {checkoutStep === "success" ? (
+                        <div className="payment-success-card">
+                            <FaCheckCircle className="success-icon" />
+                            <h1>Đặt hàng thành công</h1>
+                            <p>
+                                Đơn hàng <strong>{orderData?.orderCode}</strong> đã được ghi nhận.
+                                {" "}
+                                {orderData?.paymentMethod === ORDER_PAYMENT_METHODS.COD
+                                    ? "Bạn sẽ thanh toán khi nhận hàng."
+                                    : "Hệ thống đã nhận yêu cầu xác nhận chuyển khoản của bạn."}
+                            </p>
+                            <p>
+                                Dear Rose sẽ liên hệ với bạn
+                                {" "}
+                                <strong>{formData.phone || "số điện thoại của bạn"}</strong>
+                                {" "}
+                                để xác nhận và giao hàng sớm nhất.
+                            </p>
+                            <div className="payment-step-actions success-actions">
+                                <Link to="/" className="secondary-action-btn link-btn">
+                                    Về trang chủ
+                                </Link>
+                                <Link to="/don-hang" className="place-order-btn link-btn">
+                                    Xem đơn hàng
+                                </Link>
+                            </div>
+                        </div>
+                    ) : null}
+
+                    {orderError ? <p className="field-message error checkout-error-banner">{orderError}</p> : null}
                 </div>
 
                 <aside className="checkout-summary">
@@ -460,7 +669,7 @@ function CheckoutPage() {
                         </div>
 
                         {couponCode && !appliedCoupon ? (
-                            <p className="coupon-note">Ma hop le hien tai la DEARROSE30.</p>
+                            <p className="coupon-note">Mã hợp lệ hiện tại là DEARROSE30.</p>
                         ) : null}
                     </div>
 
@@ -486,10 +695,14 @@ function CheckoutPage() {
                     <div className="summary-footer">
                         <div className="total-row">
                             <span>Tổng cộng</span>
-                            <strong>{formatCurrency(total)}</strong>
+                            <strong>{formatCurrency(orderData?.totalAmount || total)}</strong>
                         </div>
 
-                        <button type="submit" className="place-order-btn">Đặt hàng</button>
+                        {checkoutStep === "form" ? (
+                            <button type="submit" className="place-order-btn" disabled={isCreatingOrder}>
+                                {isCreatingOrder ? "Đang tạo đơn..." : "Đặt hàng"}
+                            </button>
+                        ) : null}
                     </div>
                 </aside>
             </form>

@@ -8,12 +8,13 @@ import { memo } from 'react';
 import HomeSlider from './HomeSlider/HomeSlider.jsx';
 import "./style.scss";
 import BestSeller from '../../../components/BestSeller/BestSeller.jsx';
-
+import NewArrival from '../../../components/NewArrival/NewArrival.jsx';
 function HomePage() {
     return (
         <div className="home-page">
             <HomeSlider />
             <BestSeller />
+            <NewArrival />
         </div >
     );
 }
