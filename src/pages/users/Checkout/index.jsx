@@ -10,6 +10,8 @@ import "./style.scss";
 
 const SHIPPING_FEE = 35000;
 const COUPON_DISCOUNT = 30000;
+// TODO: Khi backend hoan thien, lay phi ship va giam gia tu API pricing/promotion
+// thay vi hardcode o frontend de tranh lech tong tien voi backend.
 
 const formatCurrency = (value) => `${value.toLocaleString("vi-VN")} VND`;
 
@@ -19,6 +21,8 @@ function CheckoutPage() {
     const { cartItems, removeFromCart } = useContext(CartContext);
     const productId = Number(searchParams.get("productId"));
     const product = products.find((item) => item.id === productId) ?? products[0];
+    // TODO: Fallback nay dang doc tu data local.
+    // Khi ket noi backend, nen lay product/cart tu API va xu ly productId khong hop le theo response server.
     const fallbackItem = useMemo(() => ({
         id: product.id,
         name: product.name,
@@ -94,6 +98,8 @@ function CheckoutPage() {
             accountNumber: ""
         }
     };
+    // TODO: paymentInfo dang fallback rong neu backend chua tra ve du lieu thanh toan.
+    // Khi chot contract backend, validate day du QR, amount, transferContent va bankInfo.
 
     useEffect(() => {
         let isMounted = true;
@@ -267,6 +273,8 @@ function CheckoutPage() {
 
     const handleApplyCoupon = () => {
         const normalizedCode = couponCode.trim().toUpperCase();
+        // TODO: Hien tai coupon chi validate local voi 1 ma co dinh.
+        // Khi co backend, can goi API validate coupon va nhan ve discount/thong bao loi tu server.
         setAppliedCoupon(normalizedCode === "DEARROSE30" ? normalizedCode : "");
     };
 
@@ -276,6 +284,8 @@ function CheckoutPage() {
         setIsCreatingOrder(true);
 
         try {
+            // TODO: Neu backend yeu cau them field nhu userId, email, shippingFee, voucherId,
+            // item variant id... thi cap nhat buildCreateOrderPayload cho dung contract.
             const payload = buildCreateOrderPayload({
                 customer: {
                     fullName: formData.fullName,
@@ -298,6 +308,8 @@ function CheckoutPage() {
             setOrderData(createdOrder);
 
             if (createdOrder.paymentMethod === ORDER_PAYMENT_METHODS.COD) {
+                // TODO: Hien tai chi xoa gio hang tren client.
+                // Neu gio hang duoc quan ly tren backend thi can dong bo xoa/cap nhat bang API sau khi dat hang.
                 clearPurchasedCartItems();
                 setCheckoutStep("success");
                 return;
@@ -322,6 +334,8 @@ function CheckoutPage() {
         setIsConfirmingPayment(true);
 
         try {
+            // TODO: Flow nay dang cho nguoi dung tu bam xac nhan da chuyen khoan.
+            // Khi tich hop cong thanh toan that, co the doi sang polling, webhook hoac query payment status tu backend.
             await orderApi.confirmPayment({
                 orderCode: orderData.orderCode
             });
@@ -530,6 +544,8 @@ function CheckoutPage() {
                                     {paymentInfo.qrCodeUrl ? (
                                         <img src={paymentInfo.qrCodeUrl} alt="QR thanh toan don hang" />
                                     ) : (
+                                        // TODO: Placeholder nay chi phu hop khi backend chua tra QR.
+                                        // Sau nay co the can them loading, expired QR, hoac nut tao lai ma.
                                         <div className="qr-placeholder">QR dang duoc backend cap nhat</div>
                                     )}
                                     <strong>Số tiền cần thanh toán</strong>
@@ -668,6 +684,8 @@ function CheckoutPage() {
                             <button type="button" onClick={handleApplyCoupon}>Áp dụng</button>
                         </div>
 
+                        {/* TODO: Message nay dang hardcode theo ma local.
+                            Khi validate coupon qua backend, hien message theo response thuc te. */}
                         {couponCode && !appliedCoupon ? (
                             <p className="coupon-note">Mã hợp lệ hiện tại là DEARROSE30.</p>
                         ) : null}

@@ -1,4 +1,6 @@
 export const products = [
+    // TODO: Day la mock data cho frontend.
+    // Khi ket noi backend, thay bang API products va chi giu file nay neu can fallback/dev seed data.
     {
         id: 1,
         name: "Pearl Top (áo dây bên ngoài) - Remmus | Áo hai dây xuyên thấu silver nhún ngực cho nữ",
