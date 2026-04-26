@@ -1,12 +1,11 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+﻿import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { products } from "../../../data/product.js";
 import "./style.scss";
+import { formatVND } from "../../../utils/format.js";
 
 // TODO: `products` đang đọc từ data local.
 // Khi kết nối backend, thay bằng API lấy danh sách sản phẩm theo query/filter/pagination.
-
-const formatCurrency = (value) => `${value.toLocaleString("vi-VN")} VND`;
 
 const PRICE_RANGES = [
     { value: "all", label: "Tất cả mức giá" },
@@ -197,7 +196,7 @@ const ProductPage = () => {
                                 checked={showHotOnly}
                                 onChange={() => setShowHotOnly((prev) => !prev)}
                             />
-                            <span>Chỉ hiện sản phẩm nổi bật</span>
+                            <span>Chỉ hiển thị sản phẩm nổi bật</span>
                         </label>
                         <label className="check-option">
                             <input
@@ -205,7 +204,7 @@ const ProductPage = () => {
                                 checked={showInStockOnly}
                                 onChange={() => setShowInStockOnly((prev) => !prev)}
                             />
-                            <span>Chỉ hiện sản phẩm còn hàng</span>
+                            <span>Chỉ hiển thị sản phẩm còn hàng</span>
                         </label>
                     </div>
 
@@ -281,7 +280,7 @@ const ProductPage = () => {
                                         <h3>{item.name}</h3>
 
                                         <div className="product-card__footer">
-                                            <p className="price">{formatCurrency(item.price)}</p>
+                                            <p className="price">{formatVND(item.price)}</p>
                                             {/* TODO: Trạng thái tồn kho hiện đang dựa trực tiếp vào `stock`.
                                                 Khi có backend, cần xem dùng `stock`, `inventoryStatus` hay `availableQuantity`. */}
                                             <span className={`stock ${item.stock > 0 ? "in-stock" : "out-stock"}`}>
@@ -300,3 +299,4 @@ const ProductPage = () => {
 };
 
 export default memo(ProductPage);
+

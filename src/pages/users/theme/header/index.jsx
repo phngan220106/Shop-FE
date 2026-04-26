@@ -3,7 +3,7 @@ import "./style.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineSearch, AiOutlineUser, AiOutlineShoppingCart, AiOutlineMenu, AiOutlineRight } from "react-icons/ai";
 import { FiBriefcase, FiShoppingBag, FiTag } from "react-icons/fi";
-import AuthModal from "../../../../components/AuthModal";
+import AuthModal from "../../../../components/AuthModal/AuthModal.jsx";
 import Cart from "../../../../components/Cart";
 import { AuthContext } from "../../../../context/AuthContext";
 import { CartContext } from "../../../../context/CartContext";

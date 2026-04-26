@@ -1,0 +1,17 @@
+.auth-form--register {
+    .form-group input {
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 250, 255, 0.98) 100%),
+            #fff;
+        border-color: rgba(123, 167, 223, 0.26);
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #101828 0%, #243b53 100%);
+        box-shadow: 0 16px 28px rgba(16, 24, 40, 0.18);
+    }
+
+    .auth-form__note--soft {
+        color: #667085;
+    }
+}

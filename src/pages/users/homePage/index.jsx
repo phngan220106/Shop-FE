@@ -15,7 +15,9 @@ function HomePage() {
             <HomeSlider />
             <BestSeller />
             <NewArrival />
+
         </div >
+
     );
 }
 export default memo(HomePage);

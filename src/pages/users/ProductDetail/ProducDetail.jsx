@@ -2,6 +2,7 @@ import { useMemo, useState, useContext, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { CartContext } from "../../../context/CartContext";
 import { products } from "../../../data/product.js";
+import { formatVND } from "../../../utils/format.js";
 import BestSeller from '../../../components/BestSeller/BestSeller.jsx';
 
 import "./ProductDetail.scss";
@@ -70,7 +71,7 @@ function ProductDetail() {
                 <div className="product-info">
                     <p className="brand">Dear Róse</p>
                     <h1>{product.name}</h1>
-                    <p className="price">{product.price.toLocaleString()} VND</p>
+                    <p className="price">{formatVND(product.price)}</p>
 
                     <div className="option-group">
                         <span className="option-label">Màu sắc</span>

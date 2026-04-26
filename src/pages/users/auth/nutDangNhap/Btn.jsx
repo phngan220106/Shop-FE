@@ -1,5 +1,5 @@
 import React from "react";
-import AuthModal from "../../../../components/AuthModal";
+import AuthModal from "../../../../components/AuthModal/AuthModal.jsx";
 import { useState } from "react";
 
 function Btn() {

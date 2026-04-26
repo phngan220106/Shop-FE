@@ -6,6 +6,7 @@ import { regionApi } from "../../../apis/region.js";
 import { buildCreateOrderPayload, orderApi, ORDER_PAYMENT_METHODS } from "../../../apis/order.js";
 import { CartContext } from "../../../context/CartContext.jsx";
 import { products } from "../../../data/product.js";
+import { formatVND } from "../../../utils/format.js";
 import "./style.scss";
 
 const SHIPPING_FEE = 35000;
@@ -13,7 +14,7 @@ const COUPON_DISCOUNT = 30000;
 // TODO: Khi backend hoan thien, lay phi ship va giam gia tu API pricing/promotion
 // thay vi hardcode o frontend de tranh lech tong tien voi backend.
 
-const formatCurrency = (value) => `${value.toLocaleString("vi-VN")} VND`;
+
 
 function CheckoutPage() {
     const location = useLocation();
@@ -549,7 +550,7 @@ function CheckoutPage() {
                                         <div className="qr-placeholder">QR dang duoc backend cap nhat</div>
                                     )}
                                     <strong>Số tiền cần thanh toán</strong>
-                                    <p className="payment-amount">{formatCurrency(paymentInfo.amount || total)}</p>
+                                    <p className="payment-amount">{formatVND(paymentInfo.amount || total)}</p>
                                     <p className="payment-caption">Nội dung chuyển khoản: {paymentInfo.transferContent}</p>
                                 </div>
 
@@ -668,7 +669,7 @@ function CheckoutPage() {
                                     <p>{item.size} / {item.color}</p>
                                 </div>
 
-                                <strong>{formatCurrency(item.price * item.quantity)}</strong>
+                                <strong>{formatVND(item.price * item.quantity)}</strong>
                             </div>
                         ))}
                     </div>
@@ -694,11 +695,11 @@ function CheckoutPage() {
                     <div className="price-list">
                         <div className="price-row">
                             <span>Tạm tính</span>
-                            <strong>{formatCurrency(subtotal)}</strong>
+                            <strong>{formatVND(subtotal)}</strong>
                         </div>
                         <div className="price-row">
                             <span>Phí vận chuyển</span>
-                            <strong>{formatCurrency(SHIPPING_FEE)}</strong>
+                            <strong>{formatVND(SHIPPING_FEE)}</strong>
                         </div>
                         <div className="price-row muted">
                             <span>Giảm giá thành viên</span>
@@ -706,14 +707,14 @@ function CheckoutPage() {
                         </div>
                         <div className="price-row muted">
                             <span>Giảm giá coupon</span>
-                            <strong>- {couponDiscount.toLocaleString("vi-VN")} d</strong>
+                            <strong>- {formatVND(couponDiscount)}</strong>
                         </div>
                     </div>
 
                     <div className="summary-footer">
                         <div className="total-row">
                             <span>Tổng cộng</span>
-                            <strong>{formatCurrency(orderData?.totalAmount || total)}</strong>
+                            <strong>{formatVND(orderData?.totalAmount || total)}</strong>
                         </div>
 
                         {checkoutStep === "form" ? (

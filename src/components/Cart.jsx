@@ -2,6 +2,7 @@ import { memo, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineClose } from "react-icons/ai";
 import { CartContext } from "../context/CartContext.jsx";
+import { formatVND } from "../utils/format.js";
 import "./style.scss";
 
 const Cart = ({ onClose }) => {
@@ -60,7 +61,7 @@ const Cart = ({ onClose }) => {
                                     <div className="cart-item-info">
                                         <h3>{item.name}</h3>
                                         <p>{item.size} / {item.color}</p>
-                                        <strong>{(item.price * item.quantity).toLocaleString("vi-VN")} VND</strong>
+                                        <strong>{formatVND(item.price * item.quantity)}</strong>
                                         <div className="cart-item-actions">
                                             <div className="cart-qty">
                                                 <button
@@ -97,7 +98,7 @@ const Cart = ({ onClose }) => {
                     <div className="cart-footer">
                         <div className="cart-summary-row">
                             <span>Tạm tính</span>
-                            <strong>{cartSubtotal.toLocaleString("vi-VN")} VND</strong>
+                            <strong>{formatVND(cartSubtotal)}</strong>
                         </div>
                         <div className="cart-footer-actions">
                             <button type="button" className="btn-secondary" onClick={clearCart}>

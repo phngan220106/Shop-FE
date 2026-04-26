@@ -1,5 +1,6 @@
 import "./BestSeller.scss";
 import { products } from "../../data/product.js";
+import { formatVND } from "../../utils/format.js";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 function BestSeller() {
@@ -49,7 +50,7 @@ function BestSeller() {
 
                                 <p className="name">{item.name}</p>
                                 <p className="price">
-                                    {item.price.toLocaleString()} VND
+                                    {formatVND(item.price)}
                                 </p>
 
                             </div>
