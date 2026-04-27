@@ -7,6 +7,7 @@ import AuthModal from "../../../../components/AuthModal/AuthModal.jsx";
 import Cart from "../../../../components/Cart";
 import { AuthContext } from "../../../../context/AuthContext";
 import { CartContext } from "../../../../context/CartContext";
+import UserDropdown from "../../../../components/UserDropdown/UserDropdown.jsx";
 
 const categoryItems = [
     { label: "QUẦN ÁO", slug: "quan-ao", icon: FiShoppingBag },
@@ -15,7 +16,7 @@ const categoryItems = [
 ];
 
 const Header = () => {
-    const { user, logout } = useContext(AuthContext);
+    const { user, loading, logout } = useContext(AuthContext);
     const { cartCount } = useContext(CartContext);
     const [isAuthOpen, setIsAuthOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
@@ -56,7 +57,7 @@ const Header = () => {
             <div className="header-middle">
                 <div className="header-inner content">
                     <Link to="/" className="logo">
-                        <img src="./logo.png" alt="Logo" />
+                        <img src="/logo.png" alt="Logo" />
                     </Link>
 
                     <form className="search-box" onSubmit={handleSearch}>
@@ -72,16 +73,13 @@ const Header = () => {
                     </form>
 
                     <div className="header-actions">
-                        {user ? (
-                            <button
-                                type="button"
-                                className="user-auth-btn"
-                                onClick={logout}
-                                aria-label="Đăng xuất"
-                            >
-                                <AiOutlineUser className="icon" />
-                                <span className="auth-label">Đăng xuất</span>
+                        {loading ? (
+                            <button type="button" className="user-auth-btn user-auth-btn--loading" disabled aria-label="Đang tải tài khoản">
+                                <span className="user-auth-skeleton" />
+                                <span className="auth-label">Đang tải...</span>
                             </button>
+                        ) : user ? (
+                            <UserDropdown user={user} onLogout={logout} />
                         ) : (
                             <button
                                 type="button"

@@ -1,12 +1,40 @@
 import "./BestSeller.scss";
-import { products } from "../../data/product.js";
+import { productService } from "../../services/productService.js";
 import { formatVND } from "../../utils/format.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import PageLoading from "../PageLoading/PageLoading.jsx";
 function BestSeller() {
     const [startIndex, setStartIndex] = useState(0);
+    const [products, setProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     const ITEMS_PER_PAGE = 4;
+
+    useEffect(() => {
+        let isMounted = true;
+
+        async function loadProducts() {
+            setIsLoading(true);
+
+            const result = await productService.list({ sortBy: "featured", limit: 8, page: 1 });
+
+            if (isMounted) {
+                setProducts(result.items);
+                setIsLoading(false);
+            }
+        }
+
+        loadProducts();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    if (isLoading) {
+        return <PageLoading compact title="Đang tải BEST SELLER" description="Danh sách sản phẩm nổi bật đang được lấy từ API." />;
+    }
 
     const next = () => {
         if (startIndex + ITEMS_PER_PAGE < products.length) {

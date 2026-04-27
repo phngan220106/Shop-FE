@@ -1,4 +1,5 @@
-import { createContext, useEffect, useState } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useCallback, useEffect, useState } from "react";
 import { getProfile } from "../services/authServices.js";
 
 export const AuthContext = createContext();
@@ -11,6 +12,28 @@ export const AuthProvider = ({ children }) => {
 
     const [loading, setLoading] = useState(true);
 
+    const logout = useCallback(() => {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user");
+
+        setUser(null);
+        window.location.href = "/login";
+    }, []);
+
+    const fetchProfile = useCallback(async () => {
+        try {
+            const res = await getProfile();
+            setUser(res.user);
+
+            localStorage.setItem("user", JSON.stringify(res.user));
+        } catch {
+            logout();
+        } finally {
+            setLoading(false);
+        }
+    }, [logout]);
+
     useEffect(() => {
         // nếu có token → lấy profile lại (đảm bảo token còn valid)
         const token = localStorage.getItem("access_token");
@@ -20,20 +43,7 @@ export const AuthProvider = ({ children }) => {
         } else {
             setLoading(false);
         }
-    }, []);
-
-    const fetchProfile = async () => {
-        try {
-            const res = await getProfile();
-            setUser(res.user);
-
-            localStorage.setItem("user", JSON.stringify(res.user));
-        } catch (error) {
-            logout();
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [fetchProfile]);
 
     const loginContext = (data) => {
         const { access_token, refresh_token, user } = data;
@@ -43,15 +53,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem("user", JSON.stringify(user));
 
         setUser(user);
-    };
-
-    const logout = () => {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        localStorage.removeItem("user");
-
-        setUser(null);
-        window.location.href = "/login";
     };
 
     return (

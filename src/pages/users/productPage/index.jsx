@@ -1,8 +1,11 @@
-﻿import { memo, useEffect, useMemo, useRef, useState } from "react";
+﻿import { memo, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { products } from "../../../data/product.js";
+import { productService } from "../../../services/productService.js";
+import { categoryService } from "../../../services/categoryService.js";
 import "./style.scss";
 import { formatVND } from "../../../utils/format.js";
+import PageLoading from "../../../components/PageLoading/PageLoading.jsx";
+import ErrorState from "../../../components/ErrorState/ErrorState.jsx";
 
 // TODO: `products` đang đọc từ data local.
 // Khi kết nối backend, thay bằng API lấy danh sách sản phẩm theo query/filter/pagination.
@@ -24,8 +27,9 @@ const SORT_OPTIONS = [
 ];
 
 const ProductPage = () => {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const keyword = (searchParams.get("tu-khoa") || "").trim().toLowerCase();
+    const currentPage = Math.max(Number(searchParams.get("page") || 1), 1);
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [selectedPriceRange, setSelectedPriceRange] = useState("all");
     const [showHotOnly, setShowHotOnly] = useState(false);
@@ -33,89 +37,98 @@ const ProductPage = () => {
     const [sortBy, setSortBy] = useState("featured");
     const [isSortOpen, setIsSortOpen] = useState(false);
     const sortDropdownRef = useRef(null);
+    const [categories, setCategories] = useState([{ slug: "all", name: "Tất cả sản phẩm" }]);
+    const [products, setProducts] = useState([]);
+    const [totalProducts, setTotalProducts] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
+    const [pageError, setPageError] = useState("");
+    const pageSize = 12;
     // TODO: Các state filter/sort hiện đang chỉ quản lý trên frontend.
     // Khi có backend, cần đồng bộ với query params và gửi lên API để lọc/sắp xếp ở server.
 
-    const categories = useMemo(
-        () => ["all", ...new Set(products.map((product) => product.category))],
-        []
-    );
-    // TODO: `categories` đang được suy ra từ danh sách local.
-    // Khi làm backend, cần xem có API categories riêng hoặc API products trả filter metadata hay không.
-
     const selectedSortOption = SORT_OPTIONS.find((option) => option.value === sortBy) ?? SORT_OPTIONS[0];
 
-    const filteredProducts = useMemo(() => {
-        let nextProducts = [...products];
-        // TODO: Toàn bộ search/filter/sort đang xử lý client-side.
-        // Khi danh sách lớn và có backend, nên đưa logic này sang API để tránh tải dữ liệu dư thừa.
+    const updatePageQuery = (nextPage) => {
+        const nextSearchParams = new URLSearchParams(searchParams);
 
-        if (keyword) {
-            nextProducts = nextProducts.filter((product) => (
-                product.name.toLowerCase().includes(keyword)
-            ));
-            // TODO: Search hiện chỉ match theo `name` local.
-            // Backend có thể cần full-text search, bỏ dấu, tìm theo category/sku/tag...
+        if (nextPage <= 1) {
+            nextSearchParams.delete("page");
+        } else {
+            nextSearchParams.set("page", String(nextPage));
         }
 
-        if (selectedCategory !== "all") {
-            nextProducts = nextProducts.filter((product) => product.category === selectedCategory);
-        }
+        setSearchParams(nextSearchParams);
+    };
 
-        if (selectedPriceRange !== "all") {
-            nextProducts = nextProducts.filter((product) => {
-                if (selectedPriceRange === "under-200") {
-                    return product.price < 200000;
+    const filteredProducts = products;
+    const totalPages = Math.max(1, Math.ceil(totalProducts / pageSize));
+
+    useEffect(() => {
+        let isMounted = true;
+
+        async function loadCategories() {
+            try {
+                const data = await categoryService.list();
+
+                if (isMounted && Array.isArray(data) && data.length > 0) {
+                    setCategories([{ slug: "all", name: "Tất cả sản phẩm" }, ...data]);
                 }
-
-                if (selectedPriceRange === "200-400") {
-                    return product.price >= 200000 && product.price <= 400000;
+            } catch {
+                if (isMounted) {
+                    setCategories([{ slug: "all", name: "Tất cả sản phẩm" }]);
                 }
-
-                if (selectedPriceRange === "400-600") {
-                    return product.price > 400000 && product.price <= 600000;
-                }
-
-                if (selectedPriceRange === "over-600") {
-                    return product.price > 600000;
-                }
-
-                return true;
-            });
+            }
         }
 
-        if (showHotOnly) {
-            nextProducts = nextProducts.filter((product) => product.isHot);
+        loadCategories();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        async function loadProducts() {
+            setIsLoading(true);
+            setPageError("");
+
+            try {
+                const result = await productService.list({
+                    keyword,
+                    category: selectedCategory,
+                    priceRange: selectedPriceRange,
+                    hotOnly: showHotOnly,
+                    inStockOnly: showInStockOnly,
+                    sortBy,
+                    page: currentPage,
+                    limit: pageSize
+                });
+
+                if (isMounted) {
+                    setProducts(result.items);
+                    setTotalProducts(result.total);
+                }
+            } catch {
+                if (isMounted) {
+                    setProducts([]);
+                    setTotalProducts(0);
+                    setPageError("Không tải được danh sách sản phẩm.");
+                }
+            } finally {
+                if (isMounted) {
+                    setIsLoading(false);
+                }
+            }
         }
 
-        if (showInStockOnly) {
-            nextProducts = nextProducts.filter((product) => product.stock > 0);
-        }
+        loadProducts();
 
-        nextProducts.sort((firstProduct, secondProduct) => {
-            if (sortBy === "price-asc") {
-                return firstProduct.price - secondProduct.price;
-            }
-
-            if (sortBy === "price-desc") {
-                return secondProduct.price - firstProduct.price;
-            }
-
-            if (sortBy === "name-asc") {
-                return firstProduct.name.localeCompare(secondProduct.name);
-            }
-
-            if (sortBy === "stock-desc") {
-                return secondProduct.stock - firstProduct.stock;
-            }
-
-            return Number(secondProduct.isHot) - Number(firstProduct.isHot);
-        });
-        // TODO: Thứ tự `featured` hiện đang ưu tiên `isHot` theo data local.
-        // Cần đối chiếu với backend xem có trường ranking/score/pinned để sắp xếp nổi bật không.
-
-        return nextProducts;
-    }, [keyword, selectedCategory, selectedPriceRange, showHotOnly, showInStockOnly, sortBy]);
+        return () => {
+            isMounted = false;
+        };
+    }, [keyword, selectedCategory, selectedPriceRange, showHotOnly, showInStockOnly, sortBy, currentPage]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -138,6 +151,12 @@ const ProductPage = () => {
         setShowInStockOnly(false);
         setSortBy("featured");
         setIsSortOpen(false);
+        updatePageQuery(1);
+    };
+
+    const handlePageChange = (nextPage) => {
+        const safePage = Math.min(Math.max(nextPage, 1), totalPages);
+        updatePageQuery(safePage);
     };
 
     return (
@@ -161,12 +180,15 @@ const ProductPage = () => {
                         <div className="filter-stack">
                             {categories.map((category) => (
                                 <button
-                                    key={category}
+                                    key={category.slug}
                                     type="button"
-                                    className={`sidebar-option ${selectedCategory === category ? "active" : ""}`}
-                                    onClick={() => setSelectedCategory(category)}
+                                    className={`sidebar-option ${selectedCategory === category.slug ? "active" : ""}`}
+                                    onClick={() => {
+                                        setSelectedCategory(category.slug);
+                                        updatePageQuery(1);
+                                    }}
                                 >
-                                    {category === "all" ? "Tất cả sản phẩm" : category}
+                                    {category.name}
                                 </button>
                             ))}
                         </div>
@@ -180,7 +202,10 @@ const ProductPage = () => {
                                     key={range.value}
                                     type="button"
                                     className={`sidebar-option ${selectedPriceRange === range.value ? "active" : ""}`}
-                                    onClick={() => setSelectedPriceRange(range.value)}
+                                    onClick={() => {
+                                        setSelectedPriceRange(range.value);
+                                        updatePageQuery(1);
+                                    }}
                                 >
                                     {range.label}
                                 </button>
@@ -194,7 +219,10 @@ const ProductPage = () => {
                             <input
                                 type="checkbox"
                                 checked={showHotOnly}
-                                onChange={() => setShowHotOnly((prev) => !prev)}
+                                onChange={() => {
+                                    setShowHotOnly((prev) => !prev);
+                                    updatePageQuery(1);
+                                }}
                             />
                             <span>Chỉ hiển thị sản phẩm nổi bật</span>
                         </label>
@@ -202,7 +230,10 @@ const ProductPage = () => {
                             <input
                                 type="checkbox"
                                 checked={showInStockOnly}
-                                onChange={() => setShowInStockOnly((prev) => !prev)}
+                                onChange={() => {
+                                    setShowInStockOnly((prev) => !prev);
+                                    updatePageQuery(1);
+                                }}
                             />
                             <span>Chỉ hiển thị sản phẩm còn hàng</span>
                         </label>
@@ -216,7 +247,7 @@ const ProductPage = () => {
                 <div className="product-content">
                     <div className="filter-bar">
                         <div className="filter-bar__summary">
-                            <strong>{filteredProducts.length}</strong>
+                            <strong>{totalProducts}</strong>
                             <span>sản phẩm phù hợp</span>
                         </div>
 
@@ -244,6 +275,7 @@ const ProductPage = () => {
                                                 onClick={() => {
                                                     setSortBy(option.value);
                                                     setIsSortOpen(false);
+                                                    updatePageQuery(1);
                                                 }}
                                                 role="option"
                                                 aria-selected={sortBy === option.value}
@@ -257,7 +289,19 @@ const ProductPage = () => {
                         </div>
                     </div>
 
-                    {filteredProducts.length === 0 ? (
+                    {isLoading ? (
+                        <PageLoading
+                            title="Đang tải danh sách sản phẩm"
+                            description="Lọc, sắp xếp và phân trang đang được xử lý từ API."
+                        />
+                    ) : pageError ? (
+                        <ErrorState
+                            title="Không tải được sản phẩm"
+                            description={pageError}
+                            actionLabel="Tải lại"
+                            onRetry={() => updatePageQuery(currentPage)}
+                        />
+                    ) : filteredProducts.length === 0 ? (
                         <p className="empty">Không tìm thấy sản phẩm phù hợp.</p>
                     ) : (
                         <div className="product-list">
@@ -292,6 +336,18 @@ const ProductPage = () => {
                             ))}
                         </div>
                     )}
+
+                    <div className="pagination-bar">
+                        <button type="button" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage <= 1}>
+                            Trang trước
+                        </button>
+                        <span>
+                            Trang {currentPage} / {totalPages}
+                        </span>
+                        <button type="button" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage >= totalPages}>
+                            Trang sau
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
