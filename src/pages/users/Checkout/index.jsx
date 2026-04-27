@@ -5,8 +5,10 @@ import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { regionApi } from "../../../apis/region.js";
 import { buildCreateOrderPayload, orderApi, ORDER_PAYMENT_METHODS } from "../../../apis/order.js";
 import { CartContext } from "../../../context/CartContext.jsx";
-import { products } from "../../../data/product.js";
+import { productService } from "../../../services/productService.js";
 import { formatVND } from "../../../utils/format.js";
+import PageLoading from "../../../components/PageLoading/PageLoading.jsx";
+import ErrorState from "../../../components/ErrorState/ErrorState.jsx";
 import "./style.scss";
 
 const SHIPPING_FEE = 35000;
@@ -21,18 +23,44 @@ function CheckoutPage() {
     const [searchParams] = useSearchParams();
     const { cartItems, removeFromCart } = useContext(CartContext);
     const productId = Number(searchParams.get("productId"));
-    const product = products.find((item) => item.id === productId) ?? products[0];
-    // TODO: Fallback nay dang doc tu data local.
-    // Khi ket noi backend, nen lay product/cart tu API va xu ly productId khong hop le theo response server.
-    const fallbackItem = useMemo(() => ({
-        id: product.id,
-        name: product.name,
-        image: product.image,
-        price: product.price,
-        color: "Cream",
-        size: "S",
-        quantity: 1
-    }), [product]);
+    const [fallbackItem, setFallbackItem] = useState(null);
+    const [isLoadingFallback, setIsLoadingFallback] = useState(true);
+    // TODO: Fallback hien tai se lay san pham dau tien tu mock data.
+    // Khi co backend thật thì mới thay luồng này.
+
+    useEffect(() => {
+        let isMounted = true;
+
+        async function loadFallbackProduct() {
+            setIsLoadingFallback(true);
+
+            const detail = productId ? await productService.detail(productId) : null;
+            const fallbackList = detail ? [detail] : (await productService.list({ limit: 1, page: 1 })).items;
+            const product = fallbackList[0];
+
+            if (isMounted && product) {
+                setFallbackItem({
+                    id: product.id,
+                    name: product.name,
+                    image: product.image,
+                    price: product.price,
+                    color: "Cream",
+                    size: "S",
+                    quantity: 1
+                });
+            }
+
+            if (isMounted) {
+                setIsLoadingFallback(false);
+            }
+        }
+
+        loadFallbackProduct();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [productId]);
 
     const checkoutItems = useMemo(() => {
         const stateItems = location.state?.checkoutItems;
@@ -49,7 +77,7 @@ function CheckoutPage() {
             return cartItems;
         }
 
-        return [fallbackItem];
+        return fallbackItem ? [fallbackItem] : [];
     }, [cartItems, fallbackItem, location.state]);
 
     const [formData, setFormData] = useState({
@@ -81,6 +109,7 @@ function CheckoutPage() {
     const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
     const [isLoadingWards, setIsLoadingWards] = useState(false);
     const [regionError, setRegionError] = useState("");
+    const [regionRetryNonce, setRegionRetryNonce] = useState(0);
 
     const subtotal = useMemo(
         () => checkoutItems.reduce((total, item) => total + item.price * item.quantity, 0),
@@ -131,7 +160,7 @@ function CheckoutPage() {
         return () => {
             isMounted = false;
         };
-    }, []);
+    }, [regionRetryNonce]);
 
     useEffect(() => {
         if (!formData.cityCode) {
@@ -168,7 +197,7 @@ function CheckoutPage() {
         return () => {
             isMounted = false;
         };
-    }, [formData.cityCode]);
+    }, [formData.cityCode, regionRetryNonce]);
 
     useEffect(() => {
         if (!formData.districtCode) {
@@ -204,7 +233,7 @@ function CheckoutPage() {
         return () => {
             isMounted = false;
         };
-    }, [formData.districtCode]);
+    }, [formData.districtCode, regionRetryNonce]);
 
     useEffect(() => {
         if (!copiedField) {
@@ -361,6 +390,15 @@ function CheckoutPage() {
         }
     };
 
+    const handleRetryRegions = () => {
+        setRegionError("");
+        setRegionRetryNonce((prev) => prev + 1);
+    };
+
+    if (isLoadingFallback && checkoutItems.length === 0) {
+        return <PageLoading title="Đang tải thanh toán" description="Mình đang lấy dữ liệu sản phẩm mặc định từ API." />;
+    }
+
     return (
         <section className="checkout-page">
             <form className="checkout-layout" onSubmit={handleSubmit}>
@@ -372,6 +410,23 @@ function CheckoutPage() {
                                     <h1>Thông tin mua hàng</h1>
                                     <p>Nhập đầy đủ thông tin liên hệ để tạo đơn hàng.</p>
                                 </div>
+
+                                {isLoadingProvinces && provinces.length === 0 ? (
+                                    <PageLoading
+                                        title="Đang tải địa chỉ giao hàng"
+                                        description="Đang lấy tỉnh/thành, quận/huyện và phường/xã từ VN Region API."
+                                        compact
+                                    />
+                                ) : null}
+
+                                {regionError ? (
+                                    <ErrorState
+                                        title="Không tải được dữ liệu địa chỉ"
+                                        description={regionError}
+                                        actionLabel="Thử lại"
+                                        onRetry={handleRetryRegions}
+                                    />
+                                ) : null}
 
                                 <div className="field-list">
                                     <select name="country" value={formData.country} onChange={handleInputChange}>

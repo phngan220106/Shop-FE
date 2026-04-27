@@ -1,9 +1,10 @@
 import { useMemo, useState, useContext, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { CartContext } from "../../../context/CartContext";
-import { products } from "../../../data/product.js";
+import { productService } from "../../../services/productService.js";
 import { formatVND } from "../../../utils/format.js";
-import BestSeller from '../../../components/BestSeller/BestSeller.jsx';
+import PageLoading from "../../../components/PageLoading/PageLoading.jsx";
+import ErrorState from "../../../components/ErrorState/ErrorState.jsx";
 
 import "./ProductDetail.scss";
 
@@ -23,11 +24,81 @@ function ProductDetail() {
     );
 
     const sizes = useMemo(() => ["S", "M", "L", "XL"], []);
+    const [product, setProduct] = useState(null);
+    const [relatedProducts, setRelatedProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
 
-    const product = products.find(p => p.id === Number(id));
+    const decreaseQuantity = () => {
+        setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+    };
 
-    if (!product) {
-        return <p>Không tìm thấy sản phẩm</p>;
+    const increaseQuantity = () => {
+        setQuantity((prev) => prev + 1);
+    };
+    useEffect(() => {
+        let isMounted = true;
+
+        async function loadProductDetail() {
+            setIsLoading(true);
+            setError("");
+
+            try {
+                const detail = await productService.detail(id);
+
+                if (!detail) {
+                    throw new Error("Không tìm thấy sản phẩm");
+                }
+
+                const related = await productService.related({
+                    category: detail.categorySlug || detail.category,
+                    excludeId: detail.id,
+                    limit: 4
+                });
+
+                if (isMounted) {
+                    setProduct(detail);
+                    setRelatedProducts(related);
+                }
+            } catch (loadError) {
+                if (isMounted) {
+                    setError(loadError?.message || "Không tải được chi tiết sản phẩm.");
+                    setProduct(null);
+                    setRelatedProducts([]);
+                }
+            } finally {
+                if (isMounted) {
+                    setIsLoading(false);
+                }
+            }
+        }
+
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "smooth"
+        });
+
+        loadProductDetail();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [id]);
+
+    useEffect(() => {
+        if (addedSuccess) {
+            const timer = setTimeout(() => setAddedSuccess(false), 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [addedSuccess]);
+
+    if (isLoading) {
+        return <PageLoading title="Đang tải chi tiết sản phẩm" description="Đợi một chút, mình đang lấy dữ liệu từ API." />;
+    }
+
+    if (error) {
+        return <ErrorState title="Không tải được sản phẩm" description={error} />;
     }
 
     const cartItem = {
@@ -39,27 +110,6 @@ function ProductDetail() {
         color: selectedColor,
         size: selectedSize
     };
-
-    const decreaseQuantity = () => {
-        setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-    };
-
-    const increaseQuantity = () => {
-        setQuantity((prev) => prev + 1);
-    };
-    useEffect(() => {
-        window.scrollTo({
-            top: 0,
-            left: 0,
-            behavior: "smooth" // "smooth" giúp hiệu ứng cuộn mượt mà hơn
-        });
-    }, [id]);
-    useEffect(() => {
-        if (addedSuccess) {
-            const timer = setTimeout(() => setAddedSuccess(false), 2000);
-            return () => clearTimeout(timer);
-        }
-    }, [addedSuccess]);
 
     return (
         <>
@@ -135,8 +185,19 @@ function ProductDetail() {
                     </div>
                 </div>
             </section>
-            <div>
-                <BestSeller />
+            <div className="related-products-section">
+                <h2>Sản phẩm cùng danh mục</h2>
+                <div className="related-products-list">
+                    {relatedProducts.map((item) => (
+                        <Link to={`/san-pham/${item.id}`} key={item.id} className="related-product-card">
+                            <img src={item.image} alt={item.name} />
+                            <div>
+                                <strong>{item.name}</strong>
+                                <p>{formatVND(item.price)}</p>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
             </div>
         </>
     );

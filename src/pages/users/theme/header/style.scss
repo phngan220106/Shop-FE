@@ -191,6 +191,24 @@
                 }
             }
 
+            .user-auth-btn--loading {
+                cursor: wait;
+                opacity: 0.85;
+
+                .auth-label {
+                    color: #6b7280;
+                }
+
+                .user-auth-skeleton {
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+                    background-size: 200% 100%;
+                    animation: auth-skeleton 1.2s ease-in-out infinite;
+                }
+            }
+
             .cart-icon {
                 position: relative;
                 cursor: pointer;
@@ -512,5 +530,15 @@
                 }
             }
         }
+    }
+}
+
+@keyframes auth-skeleton {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
     }
 }
