@@ -1,0 +1,142 @@
+// ===== VARIABLES (có thể tách ra sau) =====
+$primary: #0a6ed1;
+$primary-light: #2aa7ff;
+$text: #333;
+$text-light: #999;
+$border: #eee;
+$white: #fff;
+$radius: 12px;
+
+// ===== MIXINS =====
+@mixin flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@mixin card {
+    background: $white;
+    border-radius: $radius;
+    padding: 15px;
+}
+
+// ===== SIDEBAR =====
+.sidebar {
+    width: 300px;
+
+    .user-card {
+        background: linear-gradient(135deg, $primary, $primary-light);
+        color: $white;
+        padding: 20px;
+        border-radius: $radius;
+
+        h3 {
+            margin: 5px 0;
+        }
+
+        p {
+            font-size: 13px;
+        }
+
+        .progress {
+            margin-top: 10px;
+
+            span {
+                font-size: 12px;
+            }
+
+            .progress-bar {
+                height: 6px;
+                background: $white;
+                border-radius: 10px;
+                margin-top: 5px;
+            }
+        }
+    }
+
+    .menu {
+        @include card;
+        margin-top: 15px;
+        padding: 0;
+
+        .menu-item {
+            padding: 12px;
+            border-bottom: 1px solid $border;
+            cursor: pointer;
+
+            &.active {
+                font-weight: bold;
+            }
+
+            &:hover {
+                background: #fafafa;
+            }
+        }
+    }
+}
+
+// ===== PROFILE ROW =====
+.row {
+    @include flex-between;
+    padding: 14px 0;
+    border-bottom: 1px solid $border;
+    cursor: pointer;
+
+    .value {
+        color: $text;
+    }
+
+    .empty {
+        color: $text-light;
+    }
+
+    &:hover {
+        background: #fafafa;
+    }
+}
+
+// ===== MODAL =====
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+
+    .modal {
+        @include card;
+        width: 320px;
+        margin: 120px auto;
+
+        h3 {
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid $border;
+            border-radius: 6px;
+            margin-top: 5px;
+        }
+
+        .modal-btns {
+            @include flex-between;
+            margin-top: 15px;
+
+            button {
+                padding: 6px 12px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+
+                &:first-child {
+                    background: $primary;
+                    color: $white;
+                }
+
+                &:last-child {
+                    background: #ddd;
+                }
+            }
+        }
+    }
+}

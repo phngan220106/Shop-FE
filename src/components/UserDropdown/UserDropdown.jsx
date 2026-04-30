@@ -82,14 +82,14 @@ function UserDropdown({ user, onLogout }) {
                         </div>
                     </div>
 
-                    <button
-                        type="button"
-                        className="user-dropdown__item user-dropdown__item--disabled"
-                        disabled
+                    <Link
+                        to="/tai-khoan"
+                        className="user-dropdown__item"
+                        onClick={closeMenu}
                     >
                         <AiOutlineUser />
                         <span>Tài khoản</span>
-                    </button>
+                    </Link>
 
                     <button
                         type="button"
