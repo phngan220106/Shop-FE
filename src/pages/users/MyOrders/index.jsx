@@ -1,5 +1,5 @@
 import { memo } from "react";
-const Orders = () => {
+const MyOrders = () => {
     return <div>Đây là trang Đơn hàng</div>;
 };
-export default memo(Orders);
+export default memo(MyOrders);

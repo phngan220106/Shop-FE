@@ -1,29 +1,60 @@
-import api from "../apis/default";
+import api from "../apis/default.js";
 
 export const register = async (data) => {
-    const res = await api.post("/auth/register", data);
+    try {
+        const res = await api.post("/auth/register", data);
 
-    // auto login
-    localStorage.setItem("access_token", res.data.access_token);
-    localStorage.setItem("refresh_token", res.data.refresh_token);
+        if (res.data.access_token) {
+            localStorage.setItem("access_token", res.data.access_token);
+            localStorage.setItem("refresh_token", res.data.refresh_token);
+        }
 
-    return res.data;
+        return res.data;
+    } catch (error) {
+        const errData = error.response?.data;
+        throw {
+            message: errData?.message || errData?.error || "Đăng ký thất bại",
+            errors: errData?.errors,
+        };
+    }
 };
 
 export const login = async (data) => {
-    const res = await api.post("/auth/login", data);
+    try {
+        const res = await api.post("/auth/login", data);
 
-    localStorage.setItem("access_token", res.data.access_token);
-    localStorage.setItem("refresh_token", res.data.refresh_token);
+        localStorage.setItem("access_token", res.data.access_token);
+        localStorage.setItem("refresh_token", res.data.refresh_token);
 
-    return res.data;
+        return res.data;
+    } catch (error) {
+        const errData = error.response?.data;
+        throw {
+            message: errData?.message || errData?.error || "Sai tài khoản hoặc mật khẩu",
+            errors: errData?.errors,
+        };
+    }
 };
 
 export const getProfile = async () => {
-    const res = await api.get("/auth/profile");
-    return res.data;
+    try {
+        const res = await api.get("/auth/profile");
+        return res.data;
+    } catch (error) {
+        const errData = error.response?.data;
+        throw {
+            message: errData?.message || errData?.error || "Không thể lấy thông tin tài khoản",
+            errors: errData?.errors,
+        };
+    }
 };
 
-export const logout = () => {
-    localStorage.clear();
+export const logout = async () => {
+    try {
+        await api.post("/auth/logout");
+    } catch (e) { }
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
 };
+

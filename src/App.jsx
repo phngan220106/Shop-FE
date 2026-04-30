@@ -5,6 +5,7 @@ import AppRoutes from "./routes/default.jsx";
 import Header from "./pages/users/theme/header/index.jsx";
 import Footer from "./pages/users/theme/footer/index.jsx";
 import CheckoutHeader from "./pages/users/Checkout/CheckoutHeader.jsx";
+import { AuthProvider } from "./context/AuthContext.jsx";
 
 function AppShell() {
   const location = useLocation();
@@ -25,7 +26,9 @@ function App() {
 
   return (
     <BrowserRouter>
-      <AppShell />
+      <AuthProvider>
+        <AppShell />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

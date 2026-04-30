@@ -7,7 +7,15 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(() => {
         const stored = localStorage.getItem("user");
-        return stored ? JSON.parse(stored) : null;
+        if (stored && stored !== "undefined") {
+            try {
+                return JSON.parse(stored);
+            } catch (e) {
+                console.error("Failed to parse user:", e);
+                return null;
+            }
+        }
+        return null;
     });
 
     const [loading, setLoading] = useState(true);
@@ -18,15 +26,18 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("user");
 
         setUser(null);
-        window.location.href = "/login";
+        window.location.href = "/";
     }, []);
 
     const fetchProfile = useCallback(async () => {
         try {
             const res = await getProfile();
-            setUser(res.user);
-
-            localStorage.setItem("user", JSON.stringify(res.user));
+            // Xử lý nhiều format response từ backend
+            const profileUser = res.user ?? res.data?.user ?? res.profile ?? res.data ?? res;
+            if (profileUser) {
+                setUser(profileUser);
+                localStorage.setItem("user", JSON.stringify(profileUser));
+            }
         } catch {
             logout();
         } finally {
@@ -35,7 +46,6 @@ export const AuthProvider = ({ children }) => {
     }, [logout]);
 
     useEffect(() => {
-        // nếu có token → lấy profile lại (đảm bảo token còn valid)
         const token = localStorage.getItem("access_token");
 
         if (token) {
@@ -46,13 +56,18 @@ export const AuthProvider = ({ children }) => {
     }, [fetchProfile]);
 
     const loginContext = (data) => {
-        const { access_token, refresh_token, user } = data;
+        const accessToken = data.access_token ?? data.data?.access_token;
+        const refreshToken = data.refresh_token ?? data.data?.refresh_token;
+        const userData = data.user ?? data.data?.user ?? data.profile ?? data.data;
 
-        localStorage.setItem("access_token", access_token);
-        localStorage.setItem("refresh_token", refresh_token);
-        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("access_token", accessToken);
+        localStorage.setItem("refresh_token", refreshToken);
+        localStorage.setItem("user", JSON.stringify(userData));
 
-        setUser(user);
+        if (userData) {
+            localStorage.setItem("user", JSON.stringify(userData));
+            setUser(userData);
+        }
     };
 
     return (
@@ -64,7 +79,7 @@ export const AuthProvider = ({ children }) => {
                 logout,
             }}
         >
-            {children}
+            {!loading && children}
         </AuthContext.Provider>
     );
 };
