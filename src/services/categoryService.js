@@ -1,3 +1,4 @@
+import api from "../apis/default.js";
 import { productSeed } from "../data/products.mock.js";
 
 const slugify = (value) => String(value ?? "")
@@ -36,12 +37,57 @@ const buildCategory = (name) => {
     };
 };
 
+const extractListPayload = (responseData) => {
+    if (Array.isArray(responseData)) {
+        return responseData;
+    }
+
+    if (Array.isArray(responseData?.items)) {
+        return responseData.items;
+    }
+
+    if (Array.isArray(responseData?.data)) {
+        return responseData.data;
+    }
+
+    if (Array.isArray(responseData?.categories)) {
+        return responseData.categories;
+    }
+
+    return [];
+};
+
 export const categoryService = {
     async list() {
-        return [...new Set(productSeed.map((product) => product.category))].map(buildCategory);
+        try {
+            const response = await api.get("/categories");
+            const categories = extractListPayload(response.data?.data ?? response.data)
+                .map(normalizeCategory)
+                .filter(Boolean);
+
+            if (categories.length > 0) {
+                return categories;
+            }
+
+            return [...new Set(productSeed.map((product) => product.category))].map(buildCategory);
+        } catch {
+            return [...new Set(productSeed.map((product) => product.category))].map(buildCategory);
+        }
     },
 
     async detail(identifier) {
+        try {
+            const response = await api.get(`/categories/${identifier}`);
+            const data = response.data?.data ?? response.data;
+            const category = normalizeCategory(data);
+
+            if (category) {
+                return category;
+            }
+        } catch {
+            // fall through to seed fallback
+        }
+
         const normalizedIdentifier = slugify(identifier);
         const categoryName = [...new Set(productSeed.map((product) => product.category))].find((name) => slugify(name) === normalizedIdentifier || name === identifier);
 
