@@ -7,8 +7,8 @@ import { formatVND } from "../../../utils/format.js";
 import PageLoading from "../../../components/PageLoading/PageLoading.jsx";
 import ErrorState from "../../../components/ErrorState/ErrorState.jsx";
 
-// TODO: `products` đang đọc từ data local.
-// Khi kết nối backend, thay bằng API lấy danh sách sản phẩm theo query/filter/pagination.
+// Danh sách sản phẩm hiện đi qua productService và lấy dữ liệu từ API.
+// Filter/sort/pagination đã được đẩy xuống service/backend.
 
 const PRICE_RANGES = [
     { value: "all", label: "Tất cả mức giá" },
@@ -43,8 +43,8 @@ const ProductPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [pageError, setPageError] = useState("");
     const pageSize = 12;
-    // TODO: Các state filter/sort hiện đang chỉ quản lý trên frontend.
-    // Khi có backend, cần đồng bộ với query params và gửi lên API để lọc/sắp xếp ở server.
+    // Các state filter/sort vẫn nằm ở UI, nhưng dữ liệu đã được lấy qua service/API.
+    // Query params page/keyword tiếp tục được sync qua URL để share link được.
 
     const selectedSortOption = SORT_OPTIONS.find((option) => option.value === sortBy) ?? SORT_OPTIONS[0];
 

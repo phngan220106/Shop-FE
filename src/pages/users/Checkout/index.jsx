@@ -25,8 +25,7 @@ function CheckoutPage() {
     const productId = Number(searchParams.get("productId"));
     const [fallbackItem, setFallbackItem] = useState(null);
     const [isLoadingFallback, setIsLoadingFallback] = useState(true);
-    // TODO: Fallback hien tai se lay san pham dau tien tu mock data.
-    // Khi co backend thật thì mới thay luồng này.
+    // Fallback vẫn giữ để trang checkout không bị trống nếu API chưa trả được sản phẩm.
 
     useEffect(() => {
         let isMounted = true;
