@@ -1,49 +1,83 @@
 .profile-page {
-    background: #f5f5f5;
+    background: #f5f6fa;
     min-height: 100vh;
-    padding: 20px;
+    padding: 28px;
 
-    .back-home {
+    .loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 60vh;
+        gap: 16px;
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #0a6ed1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        p {
+            margin: 0;
+            font-size: 17px;
+            color: #666;
+            font-weight: 600;
+        }
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .error-message {
+        position: fixed;
+        top: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 14px 28px;
+        background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
+        color: white;
+        border-radius: 10px;
         cursor: pointer;
-        margin-bottom: 15px;
-        color: #333;
-        font-size: 14px;
+        z-index: 1000;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        font-size: 15px;
+        font-weight: 700;
+        animation: slideDown 0.3s ease;
+    }
 
-        &:hover {
-            text-decoration: underline;
+    @keyframes slideDown {
+        from {
+            top: -60px;
+            opacity: 0;
+        }
+
+        to {
+            top: 24px;
+            opacity: 1;
         }
     }
 
     .profile-container {
         display: flex;
-        gap: 20px;
+        gap: 28px;
+        max-width: 1200px;
+        margin: 0 auto;
     }
 
-    .content {
-        flex: 1;
-
-        h2 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        .info-card {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
+    // Responsive
+    @media (max-width: 900px) {
+        .profile-container {
+            flex-direction: column;
         }
     }
 
-    .logout {
-        margin-top: 20px;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 8px;
-        background: #ddd;
-        cursor: pointer;
-
-        &:hover {
-            background: #ccc;
-        }
+    @media (max-width: 480px) {
+        padding: 16px;
     }
 }

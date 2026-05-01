@@ -1,11 +1,18 @@
-// ===== VARIABLES (có thể tách ra sau) =====
+// ===== VARIABLES =====
 $primary: #0a6ed1;
 $primary-light: #2aa7ff;
-$text: #333;
-$text-light: #999;
-$border: #eee;
+// User card colors - white/black elegant scheme
+$user-card-primary: #1a1a1a;
+$user-card-secondary: #333333;
+$user-card-light: #ffffff;
+$user-card-gray: #78909c;
+$text: #1a1a1a;
+$text-medium: #333;
+$text-light: #666;
+$border: #e8e8e8;
 $white: #fff;
-$radius: 12px;
+$radius: 14px;
+$shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 
 // ===== MIXINS =====
 @mixin flex-between {
@@ -17,81 +24,269 @@ $radius: 12px;
 @mixin card {
     background: $white;
     border-radius: $radius;
-    padding: 15px;
+    padding: 20px;
+    box-shadow: $shadow;
 }
 
 // ===== SIDEBAR =====
 .sidebar {
-    width: 300px;
+    width: 280px;
+    flex-shrink: 0;
 
     .user-card {
-        background: linear-gradient(135deg, $primary, $primary-light);
-        color: $white;
-        padding: 20px;
+        background: $white;
+        border: 1px solid #e0e0e0;
+        color: $text;
+        padding: 24px 20px;
         border-radius: $radius;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 
-        h3 {
-            margin: 5px 0;
+        .avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, $user-card-primary 0%, $user-card-secondary 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 700;
+            border: 3px solid $white;
+            color: $white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
-        p {
-            font-size: 13px;
-        }
+        .user-info {
+            flex: 1;
 
-        .progress {
-            margin-top: 10px;
-
-            span {
-                font-size: 12px;
+            .member-badge {
+                display: inline-block;
+                font-size: 11px;
+                background: $text;
+                color: $white;
+                padding: 3px 10px;
+                border-radius: 12px;
+                margin-bottom: 6px;
+                font-weight: 600;
             }
 
-            .progress-bar {
-                height: 6px;
-                background: $white;
-                border-radius: 10px;
-                margin-top: 5px;
+            h3 {
+                margin: 0 0 4px 0;
+                font-size: 19px;
+                font-weight: 700;
+                color: $text;
+            }
+
+            .email {
+                font-size: 13px;
+                color: $text-light;
+                margin: 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 160px;
+                font-weight: 500;
             }
         }
     }
 
     .menu {
         @include card;
-        margin-top: 15px;
-        padding: 0;
+        margin-top: 18px;
+        padding: 10px;
 
         .menu-item {
-            padding: 12px;
-            border-bottom: 1px solid $border;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border-radius: 10px;
             cursor: pointer;
+            transition: all 0.2s;
+            color: $text-medium;
+            font-weight: 600;
+
+            .menu-icon {
+                width: 18px;
+                height: 18px;
+                color: $primary;
+                flex-shrink: 0;
+                transition: color 0.2s;
+            }
+
+            &.active .menu-icon {
+                color: $primary;
+            }
+
+            &:hover:not(.active) .menu-icon {
+                color: $primary-light;
+            }
+
+            .menu-label {
+                font-size: 15px;
+            }
 
             &.active {
-                font-weight: bold;
+                background: linear-gradient(135deg, rgba($primary, 0.12) 0%, rgba($primary, 0.06) 100%);
+                color: $primary;
+                font-weight: 700;
+                border: 1px solid rgba($primary, 0.2);
+            }
+
+            &:hover:not(.active) {
+                background: #f5f5f5;
+            }
+        }
+    }
+
+    .sidebar-footer {
+        margin-top: 18px;
+
+        .logout-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px;
+            border: none;
+            border-radius: $radius;
+            background: $white;
+            color: $text-medium;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: $shadow;
+
+            .menu-icon {
+                width: 18px;
+                height: 18px;
+                flex-shrink: 0;
             }
 
             &:hover {
-                background: #fafafa;
+                background: #f5f5f5;
+                transform: translateY(-1px);
             }
         }
+    }
+}
+
+// ===== CONTENT =====
+.content {
+    flex: 1;
+
+    .content-header {
+        margin-bottom: 22px;
+
+        h2 {
+            margin: 0 0 6px 0;
+            font-size: 28px;
+            font-weight: 700;
+            color: $text;
+            font-family: sans-serif;
+        }
+
+        .subtitle {
+            margin: 0;
+            color: $text-light;
+            font-size: 15px;
+            font-weight: 500;
+        }
+    }
+
+    .profile-avatar-section {
+        @include card;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 22px;
+
+        .avatar-large {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, $primary, $primary-light);
+            color: $white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(10, 110, 209, 0.25);
+        }
+
+        .avatar-info {
+            .change-avatar-btn {
+                padding: 10px 20px;
+                border: 2px solid $border;
+                border-radius: 8px;
+                background: $white;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+                transition: all 0.2s;
+
+                &:hover {
+                    border-color: $primary;
+                    color: $primary;
+                    background: rgba($primary, 0.04);
+                }
+            }
+
+            .avatar-hint {
+                margin: 10px 0 0 0;
+                font-size: 13px;
+                color: $text-light;
+            }
+        }
+    }
+
+    .info-card {
+        @include card;
     }
 }
 
 // ===== PROFILE ROW =====
 .row {
     @include flex-between;
-    padding: 14px 0;
+    padding: 18px 0;
     border-bottom: 1px solid $border;
     cursor: pointer;
+    transition: background 0.2s;
+
+    span:first-child {
+        font-size: 15px;
+        color: $text-light;
+        font-weight: 600;
+    }
 
     .value {
         color: $text;
+        font-size: 15px;
+        font-weight: 600;
     }
 
     .empty {
         color: $text-light;
+        font-size: 15px;
+        font-weight: 500;
+        font-style: italic;
     }
 
     &:hover {
         background: #fafafa;
+        margin: 0 -20px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    &:last-child {
+        border-bottom: none;
     }
 }
 
@@ -99,44 +294,343 @@ $radius: 12px;
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
 
     .modal {
         @include card;
-        width: 320px;
-        margin: 120px auto;
+        width: 420px;
+        max-width: 90vw;
+        padding: 24px;
 
         h3 {
-            margin-bottom: 10px;
+            margin: 0 0 18px 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: $text;
         }
 
-        input {
+        input,
+        select {
             width: 100%;
-            padding: 8px;
-            border: 1px solid $border;
-            border-radius: 6px;
-            margin-top: 5px;
+            padding: 14px;
+            border: 2px solid $border;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            margin-top: 6px;
+            transition: border-color 0.2s;
+
+            &:focus {
+                outline: none;
+                border-color: $primary;
+                box-shadow: 0 0 0 3px rgba($primary, 0.1);
+            }
+        }
+
+        select {
+            cursor: pointer;
+            background: $white;
         }
 
         .modal-btns {
-            @include flex-between;
-            margin-top: 15px;
+            display: flex;
+            gap: 14px;
+            margin-top: 24px;
 
             button {
-                padding: 6px 12px;
+                flex: 1;
+                padding: 14px;
                 border: none;
-                border-radius: 6px;
+                border-radius: 10px;
+                font-size: 15px;
+                font-weight: 700;
                 cursor: pointer;
+                transition: all 0.2s;
 
                 &:first-child {
-                    background: $primary;
+                    background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
                     color: $white;
+                    box-shadow: 0 4px 12px rgba($primary, 0.3);
+
+                    &:hover:not(:disabled) {
+                        transform: translateY(-1px);
+                        box-shadow: 0 6px 16px rgba($primary, 0.4);
+                    }
+
+                    &:disabled {
+                        background: lighten($primary, 20%);
+                        cursor: not-allowed;
+                        box-shadow: none;
+                    }
                 }
 
                 &:last-child {
-                    background: #ddd;
+                    background: #e8e8e8;
+                    color: $text-medium;
+                    font-weight: 600;
+
+                    &:hover:not(:disabled) {
+                        background: #dcdcdc;
+                    }
+
+                    &:disabled {
+                        cursor: not-allowed;
+                        opacity: 0.6;
+                    }
                 }
             }
+        }
+    }
+}
+
+// ===== PASSWORD FORM =====
+.password-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    label {
+        font-size: 15px;
+        color: $text;
+        font-weight: 700;
+    }
+
+    input[type="password"] {
+        width: 100%;
+        padding: 14px;
+        border: 2px solid $border;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 500;
+        transition: border-color 0.2s;
+
+        &:focus {
+            outline: none;
+            border-color: $primary;
+            box-shadow: 0 0 0 3px rgba($primary, 0.1);
+        }
+
+        &:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        &::placeholder {
+            color: $text-light;
+        }
+    }
+}
+
+// ===== SUCCESS MESSAGE =====
+.success-message {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #43a047 0%, #388e3c 100%);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    z-index: 1001;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    animation: slideDown 0.3s ease;
+}
+
+// ===== TEXTAREA =====
+textarea {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid $border;
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: inherit;
+    font-weight: 500;
+    resize: vertical;
+    min-height: 90px;
+    margin-top: 6px;
+    transition: border-color 0.2s;
+
+    &:focus {
+        outline: none;
+        border-color: $primary;
+        box-shadow: 0 0 0 3px rgba($primary, 0.1);
+    }
+
+    &::placeholder {
+        color: $text-light;
+    }
+}
+
+// ===== DATE INPUT =====
+.date-input-wrapper {
+    input[type="date"] {
+        width: 100%;
+        padding: 14px;
+        border: 2px solid $border;
+        border-radius: 10px;
+        font-size: 15px;
+        margin-top: 6px;
+        cursor: pointer;
+        transition: border-color 0.2s;
+        background: $white;
+        font-weight: 500;
+
+        &:focus {
+            outline: none;
+            border-color: $primary;
+            box-shadow: 0 0 0 3px rgba($primary, 0.1);
+        }
+
+        &::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.6;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+    }
+}
+
+// ===== ADDRESS SELECTS =====
+.address-selects {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    .loading-address {
+        text-align: center;
+        padding: 14px;
+        color: $text-light;
+        font-size: 14px;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        padding: 14px;
+        border: 2px solid $border;
+        border-radius: 10px;
+        font-size: 15px;
+        margin-top: 6px;
+        font-weight: 500;
+        transition: border-color 0.2s;
+
+        &:focus {
+            outline: none;
+            border-color: $primary;
+            box-shadow: 0 0 0 3px rgba($primary, 0.1);
+        }
+
+        &::placeholder {
+            color: $text-light;
+        }
+    }
+}
+
+// ===== LOCKED FIELD =====
+.locked-field {
+    padding: 18px;
+    background: #f5f5f5;
+    border-radius: 10px;
+    color: $text-light;
+    font-size: 15px;
+    text-align: center;
+    font-weight: 600;
+}
+
+// // ===== AVATAR UPLOAD MODAL =====
+// .modal-avatar {
+//     .avatar-upload {
+//         .upload-area {
+//             border: 2px dashed $border;
+//             border-radius: 14px;
+//             padding: 50px 24px;
+//             text-align: center;
+//             cursor: pointer;
+//             transition: all 0.2s;
+
+//             &:hover {
+//                 border-color: $primary;
+//                 background: rgba($primary, 0.04);
+//             }
+
+//             .upload-icon {
+//                 font-size: 48px;
+//                 display: block;
+//                 margin-bottom: 14px;
+//             }
+
+//             p {
+//                 margin: 0 0 10px 0;
+//                 font-size: 15px;
+//                 color: $text;
+//                 font-weight: 600;
+//             }
+
+//             .upload-hint {
+//                 font-size: 13px;
+//                 color: $text-light;
+//             }
+//         }
+//     }
+// }
+
+// ===== RESPONSIVE =====
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+
+        .menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+
+            .menu-item {
+                flex: 1;
+                min-width: 130px;
+                justify-content: center;
+                padding: 12px 14px;
+
+                .menu-label {
+                    display: block;
+                }
+            }
+        }
+    }
+
+    .content {
+        .profile-avatar-section {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .info-card {
+            padding: 18px;
+        }
+    }
+
+    .row {
+        padding: 16px 0;
+
+        &:hover {
+            margin: 0 -18px;
+            padding-left: 18px;
+            padding-right: 18px;
+        }
+    }
+
+    .modal-overlay {
+        .modal {
+            width: 95%;
+            margin: 20px;
+            padding: 18px;
         }
     }
 }

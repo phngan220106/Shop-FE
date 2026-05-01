@@ -12,6 +12,7 @@ import CheckoutPage from "../pages/users/Checkout/index.jsx";
 import Profile from "../pages/users/Profile/index.jsx";
 import MyOrders from "../pages/users/MyOrders/index.jsx";
 import OrderDetail from "../pages/users/OrderDetail/index.jsx";
+import ProfilePage from "../pages/users/Profile/index.jsx";
 function AppRoutes() {
     return (
         <div>
@@ -26,7 +27,7 @@ function AppRoutes() {
                 <Route path="/category/:slug" element={<CategoryPage />} />
                 <Route path="/san-pham/:id" element={<ProductDetail />} />
                 <Route path="/thanh-toan" element={<CheckoutPage />} />
-                <Route path="/tai-khoan" element={<Profile />} />
+                <Route path="/tai-khoan" element={<ProfilePage />} />
                 <Route path="/don-hang" element={<MyOrders />} />
                 <Route path="/don-hang/:id" element={<OrderDetail />} />
             </Routes>

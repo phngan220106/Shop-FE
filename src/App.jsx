@@ -6,11 +6,11 @@ import Header from "./pages/users/theme/header/index.jsx";
 import Footer from "./pages/users/theme/footer/index.jsx";
 import CheckoutHeader from "./pages/users/Checkout/CheckoutHeader.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import ProfilePage from "./pages/users/Profile/index.jsx";
 
 function AppShell() {
   const location = useLocation();
-  const isCheckoutPage = location.pathname.startsWith("/thanh-toan");
-
+  const isCheckoutPage = location.pathname.startsWith("/thanh-toan") || location.pathname.startsWith("/tai-khoan") || location.pathname.startsWith("/don-hang");
   return (
     <div className="app-shell">
       {isCheckoutPage ? <CheckoutHeader /> : <Header />}

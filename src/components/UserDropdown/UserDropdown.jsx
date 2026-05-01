@@ -85,7 +85,12 @@ function UserDropdown({ user, onLogout }) {
                     <Link
                         to="/tai-khoan"
                         className="user-dropdown__item"
-                        onClick={closeMenu}
+                        onClick={() => {
+                            closeMenu();
+                            navigate("/tai-khoan")
+                        }
+                        }
+
                     >
                         <AiOutlineUser />
                         <span>Tài khoản</span>
