@@ -5,9 +5,8 @@ export const ORDER_PAYMENT_METHODS = {
     QR: "qr"
 };
 
-const USE_ORDER_API_MOCK = true;
-// TODO: Chuyen flag nay ve `false` hoac bo han khi backend orders san sang.
-// Hien tai checkout van dang chay mock nen UI co the khac hanh vi API that.
+const USE_ORDER_API_MOCK = false;
+// TODO: Khi backend orders chua san sang thi co the tam thoi bat lai mock.
 const MOCK_BANK_INFO = {
     bankName: "MB Bank",
     accountName: "DEAR ROSE FASHION",
